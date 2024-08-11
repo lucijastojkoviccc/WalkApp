@@ -12,6 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.trackmyfit.ui.theme.TrackMyFitTheme
+import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.runtime.*
+import com.example.trackmyfit.register.RegisterScreen
+
 
 class MainActivity : ComponentActivity() {
 
@@ -20,30 +24,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TrackMyFitTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+                // Check if the user is registered or not
+                val isUserRegistered = remember { mutableStateOf(false) }
 
+                // Here, implement logic to check if the user is registered
+                // This can be done by checking if the user data exists in Firebase or in local storage
+                // For simplicity, let's assume it's hardcoded for now:
+                isUserRegistered.value = checkIfUserIsRegistered()
+
+                if (isUserRegistered.value) {
+                    // Show the main screen (e.g., HomeScreen) if the user is registered
+                    //HomeScreen()
+                } else {
+                    // Show the RegisterScreen if the user is not registered
+                    RegisterScreen()
+                }
+
+            }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TrackMyFitTheme {
-        Greeting("Android")
+    private fun checkIfUserIsRegistered(): Boolean {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        return currentUser != null
     }
 }

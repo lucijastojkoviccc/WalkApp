@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TrackMyFit</string>
+    <string name="google_maps_key">AIzaSyChRwRFFCzH2JQvzq3JVwEL0nKoMXTCXlA</string>
 </resources>
