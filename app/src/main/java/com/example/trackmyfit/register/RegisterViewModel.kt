@@ -1,15 +1,25 @@
 package com.example.trackmyfit.register
+
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import android.net.Uri
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
+import java.util.*
+import kotlinx.coroutines.launch
 class RegisterViewModel : ViewModel() {
 
     private val _state = MutableStateFlow(RegisterState())
     val state: StateFlow<RegisterState> get() = _state
 
-    private val firestore = FirebaseFirestore.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 
     fun onFirstNameChange(newValue: String) {
         _state.value = _state.value.copy(firstName = newValue)
@@ -42,25 +52,59 @@ class RegisterViewModel : ViewModel() {
     fun onProfilePictureChange(uri: Uri?) {
         _state.value = _state.value.copy(profilePictureUri = uri)
     }
-    fun onRegisterClick() {
-        val user = mapOf(
-            "firstName" to state.value.firstName,
-            "lastName" to state.value.lastName,
-            "birthDate" to state.value.birthDate,
-            "email" to state.value.email,
-            "gender" to state.value.gender,
-            "height" to state.value.height,
-            "weight" to state.value.weight,
-            "profilePictureUri" to state.value.profilePictureUri?.toString()
+
+    fun register(email: String, password: String) {
+        viewModelScope.launch {
+            try {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val user = auth.currentUser
+                            user?.let { currentUser ->
+                                // Sačuvaj profilnu sliku ako postoji
+                                _state.value.profilePictureUri?.let { uri ->
+                                    val storageRef = storage.reference.child("profile_pictures/${currentUser.uid}.jpg")
+                                    storageRef.putFile(uri)
+                                        .addOnSuccessListener { taskSnapshot ->
+                                            taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
+                                                saveUserDataToFirestore(currentUser.uid, downloadUri.toString())
+                                            }
+                                        }
+                                        .addOnFailureListener { e ->
+                                            _state.value = _state.value.copy(error = e.message ?: "An error occurred")
+                                        }
+                                } ?: run {
+                                    // Ako profilna slika ne postoji, sačuvaj podatke bez slike
+                                    saveUserDataToFirestore(currentUser.uid, null)
+                                }
+                            }
+                        } else {
+                            _state.value = _state.value.copy(error = task.exception?.message ?: "Registration failed")
+                        }
+                    }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = e.message ?: "An error occurred")
+            }
+        }
+    }
+    private fun saveUserDataToFirestore(userId: String, profileImageUrl: String?) {
+        val userData = mapOf(
+            "firstName" to _state.value.firstName,
+            "lastName" to _state.value.lastName,
+            "birthDate" to _state.value.birthDate,
+            "gender" to _state.value.gender,
+            "height" to _state.value.height,
+            "weight" to _state.value.weight,
+            "email" to _state.value.email,
+            "profilePictureUrl" to profileImageUrl // Može biti null
         )
 
-        firestore.collection("users")
-            .add(user)
+        firestore.collection("users").document(userId).set(userData)
             .addOnSuccessListener {
-                // Uspešno sačuvano, možete dodati logiku za navigaciju
+                _state.value = _state.value.copy(isRegistered = true)
             }
-            .addOnFailureListener {
-                // Desila se greška
+            .addOnFailureListener { e ->
+                _state.value = _state.value.copy(error = e.message ?: "An error occurred")
             }
     }
 }

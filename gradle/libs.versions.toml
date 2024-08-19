@@ -14,14 +14,25 @@ activityCompose = "1.9.1"
 composeBom = "2024.04.01"
 material = "1.12.0"
 materialIconsExtendedAndroid = "1.6.8"
-playServicesBase = "21.0.1"
-playServicesLocation = "21.3.0"
-playServicesMaps = "19.0.0"
+googlePlayServicesMaps = "18.0.2"
+googlePlayServicesLocation = "21.3.0"
 preferenceKtx = "1.2.1"
-compose = "1.4.8"
+compose = "1.4.0"
 lifecycle_viewmodel_compose = "2.8.4"
+coil = "2.0.0"
+playServicesLocation = "21.3.0"
+playServicesBase = "18.0.1"
+playServicesMaps = "18.0.2"
+playServicesFitness = "21.0.1"
+playServicesAuth = "20.4.0"
+mapsCompose = "2.2.0"
+accompanist = "0.30.0"
+compose-ui-viewbinding = "1.4.0"
+
+
 
 [libraries]
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
 androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
@@ -32,7 +43,9 @@ firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+google-firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -48,22 +61,31 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
-play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+
 x-27-0 = { module = "com.google.accompanist-systemunicontroller:0.27.0" }
 
 androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 androidx-compose-ui-text = { module = "androidx.compose.ui:ui-text", version.ref = "compose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle_viewmodel_compose" }
 android-material = { module = "com.google.android.material:material", version = "1.12.0" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.6.0" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+google-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "googlePlayServicesMaps" }
+google-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "googlePlayServicesLocation" }
+play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+compose-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding", version.ref = "compose-ui-viewbinding" }
+compose-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 
-
-
-
-
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+play-services-fitness = { group = "com.google.android.gms", name = "play-services-fitness", version.ref = "playServicesFitness" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
