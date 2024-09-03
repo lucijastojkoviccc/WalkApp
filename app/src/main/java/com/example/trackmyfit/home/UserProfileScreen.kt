@@ -35,8 +35,14 @@ import androidx.compose.foundation.lazy.items
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
+import android.util.Log
 @Composable
 fun UserProfileScreen(navController: NavController) {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    if (currentUser == null) {
+        // Prikazivanje toast poruke ako je currentUser null
+        Log.d("AuthCheck", "User is null")
+    }
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     var userData by remember { mutableStateOf<UserData?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -231,7 +237,7 @@ fun WalkingTabContent(user: UserData) {
 }
 @Composable
 fun WalkBar(steps: Int, date: Date) {
-    val maxSteps = 10000 // Define the max height for the bar based on a maximum step count
+    val maxSteps = 40000 // Define the max height for the bar based on a maximum step count
     val barHeightRatio = steps.toFloat() / maxSteps
 
     // Format the date to day/month
@@ -259,6 +265,7 @@ fun WalkBar(steps: Int, date: Date) {
         // Display the formatted date under the bar
         Text(text = formattedDate, fontSize = 12.sp)
     }
+
 }
 
 data class WalkData(
@@ -268,71 +275,72 @@ data class WalkData(
 
 @Composable
 fun SleepingTabContent() {
-    val context = LocalContext.current
-    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-    var sleepSessions by remember { mutableStateOf<List<SleepSession>>(emptyList()) }
-
-    LaunchedEffect(Unit) {
-        val db = FirebaseFirestore.getInstance()
-        val querySnapshot = db.collection("sleep")
-            .whereEqualTo("userId", userId)
-            .orderBy("date")
-            .get()
-            .await()
-
-        sleepSessions = querySnapshot.documents.mapNotNull { document ->
-            val length = document.getDouble("length")?.toFloat() ?: return@mapNotNull null
-            val dateString = document.getString("date") ?: return@mapNotNull null
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val date = dateFormat.parse(dateString) ?: return@mapNotNull null
-            SleepSession(length, date)
-        }
-    }
-
-    // Horizontal scrolling for the sleep bars
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        // Using the `items` function that takes a list
-        items(sleepSessions) { session ->
-            SleepBar(length = session.length, date = session.date)
-        }
-    }
+//    val context = LocalContext.current
+//    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+//    var sleepSessions by remember { mutableStateOf<List<SleepSession>>(emptyList()) }
+//
+//    LaunchedEffect(Unit) {
+//        val db = FirebaseFirestore.getInstance()
+//        val querySnapshot = db.collection("sleep")
+//            .whereEqualTo("userId", userId)
+//            .orderBy("date")
+//            .get()
+//            .await()
+//
+//        sleepSessions = querySnapshot.documents.mapNotNull { document ->
+//            val length = document.getDouble("length")?.toFloat() ?: return@mapNotNull null
+//            val dateString = document.getString("date") ?: return@mapNotNull null
+//            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+//            val date = dateFormat.parse(dateString) ?: return@mapNotNull null
+//            SleepSession(length, date)
+//        }
+//    }
+//
+//    // Horizontal scrolling for the sleep bars
+//    LazyRow(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(16.dp)
+//    ) {
+//        // Using the `items` function that takes a list
+//        items(sleepSessions) { session ->
+//            SleepBar(length = session.length, date = session.date)
+//        }
+//    }
+    Text("Sleep content goes here")
 }
 
-@Composable
-fun SleepBar(length: Float, date: Date) {
-    val maxHours = 24f // Maximum height for the bar based on 24 hours
-    val barHeightRatio = length / maxHours
-
-    // Format the date to day/month
-    val dateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
-    val formattedDate = dateFormat.format(date)
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 8.dp)
-    ) {
-        Canvas(
-            modifier = Modifier
-                .height(150.dp)
-                .width(30.dp)
-        ) {
-            // Draw the bar based on the sleep length
-            drawRect(
-                color = Color(0xFFD7BDE2), // Using the requested color
-                size = size.copy(height = size.height * barHeightRatio)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // Display the formatted date under the bar
-        Text(text = formattedDate, fontSize = 12.sp)
-    }
-}
+//@Composable
+//fun SleepBar(length: Float, date: Date) {
+//    val maxHours = 24f // Maximum height for the bar based on 24 hours
+//    val barHeightRatio = length / maxHours
+//
+//    // Format the date to day/month
+//    val dateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
+//    val formattedDate = dateFormat.format(date)
+//
+//    Column(
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        modifier = Modifier.padding(horizontal = 8.dp)
+//    ) {
+//        Canvas(
+//            modifier = Modifier
+//                .height(150.dp)
+//                .width(30.dp)
+//        ) {
+//            // Draw the bar based on the sleep length
+//            drawRect(
+//                color = Color(0xFFD7BDE2), // Using the requested color
+//                size = size.copy(height = size.height * barHeightRatio)
+//            )
+//        }
+//
+//        Spacer(modifier = Modifier.height(4.dp))
+//
+//        // Display the formatted date under the bar
+//        Text(text = formattedDate, fontSize = 12.sp)
+//    }
+//}
 
 data class SleepSession(val length: Float, val date: Date)
 

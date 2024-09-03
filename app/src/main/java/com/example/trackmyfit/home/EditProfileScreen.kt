@@ -32,6 +32,8 @@ import java.util.*
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
 import android.content.Context
+import android.util.Log
+import com.google.firebase.storage.StorageException
 
 @Composable
 fun EditProfileScreen(navController: NavController) {
@@ -76,32 +78,50 @@ fun EditProfileScreen(navController: NavController) {
         if (showImagePickerDialog.value) {
             AlertDialog(
                 onDismissRequest = { showImagePickerDialog.value = false },
-                title = { Text("Choose Profile Picture") },
+                title = {
+                    Text(
+                        text = "Select Image",
+                        style = MaterialTheme.typography.h6,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        color = Color.Black
+                    )
+                },
                 text = {
-                    Column {
-                        IconButton(onClick = {
-                            galleryLauncher.launch("image/*")
-                            showImagePickerDialog.value = false
-                        }) {
-                            Icon(imageVector = Icons.Default.Photo, contentDescription = "Gallery")
-                            Text("Choose from Gallery")
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                cameraLauncher.launch(null)
+                                showImagePickerDialog.value = false
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Text("Take a Picture", color = Color.White)
                         }
-                        IconButton(onClick = {
-                            cameraLauncher.launch(null)
-                            showImagePickerDialog.value = false
-                        }) {
-                            Icon(imageVector = Icons.Default.CameraAlt, contentDescription = "Camera")
-                            Text("Take a Photo")
+
+                        Button(
+                            onClick = {
+                                galleryLauncher.launch("image/*")
+                                showImagePickerDialog.value = false
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Text("Choose from Gallery", color = Color.White)
                         }
                     }
                 },
-                confirmButton = {
-                    Button(onClick = { showImagePickerDialog.value = false }) {
-                        Text("Cancel")
-                    }
-                }
+                buttons = {}
             )
         }
+
 
         Column(
             modifier = Modifier
@@ -178,8 +198,17 @@ fun EditProfileScreen(navController: NavController) {
                         // Delete the previous profile picture if it exists
                         userData.profilePictureUrl?.let { url ->
                             if (url.isNotEmpty()) {
-                                val previousProfilePicRef = FirebaseStorage.getInstance().getReferenceFromUrl(url)
-                                previousProfilePicRef.delete().await()
+                                try {
+                                    val previousProfilePicRef = FirebaseStorage.getInstance().getReferenceFromUrl(url)
+                                    previousProfilePicRef.delete().await()
+                                } catch (e: Exception) {
+                                    if (e is StorageException && e.errorCode == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                                        // Slika ne postoji, preskoči brisanje
+                                        Log.w("ProfileEdit", "Previous profile picture not found, skipping delete")
+                                    } else {
+                                        Log.e("ProfileEdit", "Failed to delete previous profile picture", e)
+                                    }
+                                }
                             }
                         }
 
@@ -204,6 +233,7 @@ fun EditProfileScreen(navController: NavController) {
             ) {
                 Text(text = "Save")
             }
+
         }
     }
 }
@@ -224,5 +254,6 @@ fun saveBitmapToUri(context: Context, bitmap: Bitmap, userEmail: String): Uri? {
         null
     }
 }
+
 
 

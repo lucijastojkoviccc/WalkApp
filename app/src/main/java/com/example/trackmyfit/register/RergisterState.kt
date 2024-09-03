@@ -6,11 +6,11 @@ data class RegisterState( //user
     val lastName: String = "",
     val birthDate: String = "",
     val gender: String = "",
-    val height: String = "",
-    val weight: String = "",
+    val height: Number = 0,
+    val weight: Number = 0,
     val profilePictureUri: Uri? = null,
     val email: String = "",
-    val error: String = "",
-    val isRegistered: Boolean = false
+    val isRegistered: Boolean = false,
+    val error: String = ""
 )
 

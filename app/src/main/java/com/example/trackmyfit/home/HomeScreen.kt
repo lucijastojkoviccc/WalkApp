@@ -1,44 +1,33 @@
 package com.example.trackmyfit.home
-import com.example.trackmyfit.recorded.SleepViewModel
-import com.example.trackmyfit.recorded.StepCounterViewModel
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.*
-import androidx.compose.runtime.*
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import androidx.compose.foundation.layout.padding
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.Calendar
-import java.util.Locale
-import com.example.trackmyfit.recorded.WalkSaver
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.*
+import com.example.trackmyfit.BottomNavItem
+import com.example.trackmyfit.recorded.SleepViewModel
+import com.example.trackmyfit.recorded.walk.StepCounterViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
-import com.google.android.gms.fitness.data.SleepStages
-import com.google.android.gms.fitness.Fitness
-import com.google.android.gms.fitness.request.DataReadRequest
+import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.TimeUnit
+import android.widget.Toast
 
 @Composable
 fun MainScreen(navController: NavHostController) {
@@ -49,11 +38,14 @@ fun MainScreen(navController: NavHostController) {
         BottomNavItem.Profile
     )
 
+    val stepCounterViewModel: StepCounterViewModel = viewModel()
+    val sleepViewModel: SleepViewModel = viewModel()
     Scaffold(
         bottomBar = {
             BottomNavigation {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
+
                 items.forEach { item ->
                     BottomNavigationItem(
                         icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
@@ -61,10 +53,8 @@ fun MainScreen(navController: NavHostController) {
                         selected = currentRoute == item.route,
                         onClick = {
                             navController.navigate(item.route) {
-                                navController.graph.startDestinationRoute?.let { route ->
-                                    popUpTo(route) {
-                                        saveState = true
-                                    }
+                                popUpTo(navController.graph.startDestinationRoute ?: "home") {
+                                    saveState = true
                                 }
                                 launchSingleTop = true
                                 restoreState = true
@@ -75,40 +65,57 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "home", // Ovo je sada HomeScreen
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable("home") {
-                HomeScreenContent() // Dodajte sadržaj vašeg HomeScreen-a ovde
-            }
-            composable(BottomNavItem.Chat.route) {
-                ChatListScreen(navController)
-            }
-            composable(BottomNavItem.Add.route) {
-                //AddActivityScreen()
-            }
-            composable(BottomNavItem.Map.route) {
-                MapScreen(navController)
-            }
-            composable(BottomNavItem.Profile.route) {
-                UserProfileScreen(navController)
-            }
-        }
+        // Prikaz osnovnog sadržaja HomeScreen-a (može biti prazan, ili neki intro tekst)
+        Home(modifier = Modifier.padding(innerPadding))
+        HomeScreenContent(
+            viewModel = stepCounterViewModel,
+            sleepViewModel = sleepViewModel)
     }
 }
-
 @Composable
-fun HomeScreenContent(viewModel: StepCounterViewModel = viewModel(), sleepViewModel: SleepViewModel = viewModel()) {
+fun Home(modifier: Modifier = Modifier) {
+    Text(text = "")
+}
+@Composable
+fun HomeScreenContent(
+    viewModel: StepCounterViewModel = viewModel(),
+    sleepViewModel: SleepViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val stepCount by viewModel.stepCount.collectAsState()
+//    val stepCount by viewModel.stepCount.collectAsState()
     val scope = rememberCoroutineScope()
+
+    val stepCount by viewModel.stepCount.collectAsState()
+//    val caloriesBurned = viewModel.calculateCaloriesBurned(stepCount, weight = 70f, height = 1.7f, age = 25, gender = "male")
+//    val distanceWalked = viewModel.calculateDistanceWalked(stepCount, height = 1.7f, gender = "male")
+    // Učitavanje koraka iz SharedPreferences-a
+    //val sharedPreferences = context.getSharedPreferences("StepCounterPrefs", Context.MODE_PRIVATE)
+    //val stepCount = remember { mutableStateOf(sharedPreferences.getInt("totalSteps", 0)) }
+
+    // Kada se ekran pokrene, učitavamo broj koraka iz SharedPreferences
+//    LaunchedEffect(Unit) {
+//        // Osvježavanje podataka iz SharedPreferences kada se aplikacija otvori
+//        stepCount.value = sharedPreferences.getInt("totalSteps", 0)
+//    }
+//
+//    DisposableEffect(Unit) {
+//        // Kada je ekran aktivan, učitaj korake u realnom vremenu
+//        val listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+//            if (key == "totalSteps") {
+//                stepCount.value = prefs.getInt("totalSteps", 0)
+//            }
+//        }
+//        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+//
+//        onDispose {
+//            sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener)
+//        }
+//    }
 
     // State za čuvanje podataka o korisniku
     var weight by remember { mutableStateOf(70f) }
     var height by remember { mutableStateOf(170) }
-    var heightinm by remember { mutableStateOf(1.7f)    }
+    var heightinm by remember { mutableStateOf(1.7f) }
     var gender by remember { mutableStateOf("male") }
     var birthday by remember { mutableStateOf("") }
     var age by remember { mutableStateOf(0) }
@@ -119,8 +126,6 @@ fun HomeScreenContent(viewModel: StepCounterViewModel = viewModel(), sleepViewMo
     var sleepLength by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        viewModel.startStepCounting(context)
-
         val user = FirebaseAuth.getInstance().currentUser
         val userId = user?.uid ?: return@LaunchedEffect
         val db = FirebaseFirestore.getInstance()
@@ -128,11 +133,11 @@ fun HomeScreenContent(viewModel: StepCounterViewModel = viewModel(), sleepViewMo
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 weight = document.getDouble("weight")?.toFloat() ?: 70f
-                height = document.getDouble("height")?.toInt() ?:170
+                height = document.getDouble("height")?.toInt() ?: 170
                 gender = document.getString("gender") ?: "male"
                 birthday = document.getString("birthday") ?: ""
 
-                heightinm=height/100f
+                heightinm = height / 100f
                 if (birthday.isNotEmpty()) {
                     age = calculateAge(birthday)
                 }
@@ -140,6 +145,7 @@ fun HomeScreenContent(viewModel: StepCounterViewModel = viewModel(), sleepViewMo
             .addOnFailureListener { exception ->
                 Log.e("HomeScreenContent", "Error getting user data", exception)
             }
+
         // Fetch sleep data from Firestore
         scope.launch {
             try {
@@ -161,128 +167,135 @@ fun HomeScreenContent(viewModel: StepCounterViewModel = viewModel(), sleepViewMo
                 Log.e("HomeScreenContent", "Error fetching sleep data", e)
             }
         }
-
     }
-    //var heightinm = height/100f
-    val caloriesBurned = calculateCaloriesBurned(stepCount, weight, heightinm, age, gender)
-    val distanceWalked = calculateDistanceWalked(stepCount, heightinm, gender)
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+
+    val caloriesBurned = viewModel.calculateCaloriesBurned(stepCount, weight, heightinm, age, gender)
+    val distanceWalked = viewModel.calculateDistanceWalked(stepCount, heightinm, gender)
+
+    // Postavljanje sadržaja sa skrolovanjem
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        // Krug
-        Canvas(modifier = Modifier.size(200.dp)) {
-            drawCircle(
-                color = Color(0xFFD7BDE2), // Svetlo ljubičasta boja
-                style = Stroke(width = 20f)
-            )
+        // Naslov "Walking" iznad ljubičastog kruga
+        Text(
+            text = "Walking",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+            modifier = Modifier.padding(bottom = 8.dp, top=10.dp)
+        )
+
+        // Ljubicasti krug sa podacima unutar njega
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+                .padding(top = 20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.size(250.dp)) {
+                drawCircle(
+                    color = Color(0xFFD7BDE2), // Svetlo ljubičasta boja
+                    style = Stroke(width = 20f)
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "$stepCount steps",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "$caloriesBurned kcal",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "$distanceWalked km",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.Gray
+                )
+            }
         }
 
-        // Broj koraka
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "$stepCount steps",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "${calculateCaloriesBurned(stepCount, weight, heightinm, age, gender)} kcal",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "${calculateDistanceWalked(stepCount, heightinm, gender)} km",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            // Prikaz spavanja
-            Text(
-                text = "Sleeping",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Canvas(modifier = Modifier.size(150.dp)) {
+        // Sekcija za spavanje
+        Text(
+            text = "Sleeping",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.size(200.dp)) {
                 drawCircle(
                     color = Color.Black,
                     style = Stroke(width = 20f)
                 )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = if (sleepLength.isNotEmpty()) sleepLength else "0h 0min",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
                 color = Color(0xFFD7BDE2)
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            // Buttons for Good Night and Good Morning
-            Row {
-                // Good Night button
-                Button(
-                    onClick = {
-                        sleepStart = System.currentTimeMillis() // Start timer
-                        sleepEnd = null // Reset end time
-                        sleepLength = "" // Reset length
-                    },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)
-                ) {
-                    Text(text = "Good night!", color = Color(0xFFD7BDE2))
-                }
+        }
 
-                Spacer(modifier = Modifier.width(16.dp))
+        // Buttons for Good Night and Good Morning
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Button(
+                onClick = {
+                    sleepStart = System.currentTimeMillis()
+                    sleepEnd = null
+                    sleepLength = ""
 
-                // Good Morning button
-                Button(
-                    onClick = {
-                        sleepEnd = System.currentTimeMillis()
-                        if (sleepStart != null && sleepEnd != null) {
-                            val sleepDuration = sleepEnd!! - sleepStart!!
-                            val hours = TimeUnit.MILLISECONDS.toHours(sleepDuration)
-                            val minutes = TimeUnit.MILLISECONDS.toMinutes(sleepDuration) % 60
-                            sleepLength = "${hours}h ${minutes}min"
+                    Toast.makeText(context, "Sleep tight!", Toast.LENGTH_SHORT).show()
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)
+            ) {
+                Text(text = "Good night!", color = Color(0xFFD7BDE2))
+            }
 
-                            // Save sleep session to Firestore
-                            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@Button
-                            sleepViewModel.saveSleepSession(sleepStart!!, sleepEnd!!, sleepLength, userId)
+            Button(
+                onClick = {
+                    sleepEnd = System.currentTimeMillis()
+                    if (sleepStart != null && sleepEnd != null) {
+                        val sleepDuration = sleepEnd!! - sleepStart!!
+                        if (sleepDuration <= 0) {
+                            Log.e("SleepViewModel", "Error: Invalid sleep duration.")
+                            return@Button
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD7BDE2))
-                ) {
-                    Text(text = "Good Morning", color = Color.Black)
-                }
+                        val hours = TimeUnit.MILLISECONDS.toHours(sleepDuration)
+                        val minutes = TimeUnit.MILLISECONDS.toMinutes(sleepDuration) % 60
+                        sleepLength = "${hours}h ${minutes}min"
+
+                        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@Button
+                        sleepViewModel.saveSleepSession(sleepStart!!, sleepEnd!!, sleepLength, userId)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD7BDE2))
+            ) {
+                Text(text = "Good Morning!", color = Color.Black)
             }
         }
     }
-    LaunchedEffect(stepCount) {
-        val calendar = Calendar.getInstance()
-        if (calendar.get(Calendar.HOUR_OF_DAY) == 0 && calendar.get(Calendar.MINUTE) == 0) {
-            WalkSaver.saveWalkToDatabase(context, stepCount, caloriesBurned, distanceWalked)
-            viewModel.resetStepsAtMidnight(context) // Reset steps at midnight
-        }
-    }
-}
-fun calculateDistanceWalked(steps: Int, height: Float, gender: String): Float {
-    // Estimate stride length based on height and gender
-    val strideLength = when (gender.lowercase()) {
-        "male" -> height * 0.415f // Stride length for men
-        "female" -> height * 0.413f // Stride length for women
-        else -> height * 0.414f // Default if gender is unknown
-    }
-
-    // Calculate distance in meters
-    val distanceInMeters = steps * strideLength
-
-    // Convert distance to kilometers
-    return distanceInMeters / 1000f
 }
 fun calculateAge(birthday: String): Int {
     val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -300,35 +313,4 @@ fun calculateAge(birthday: String): Int {
     }
 
     return age
-}
-
-fun calculateCaloriesBurned(steps: Int, weight: Float, height: Float, age: Int, gender: String): Int {
-    // Harris-Benedict BMR calculation
-    val bmr = when (gender.lowercase()) {
-        "male" -> 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
-        "female" -> 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
-        else -> throw IllegalArgumentException("Invalid gender. Must be 'male' or 'female'")
-    }
-
-    // Activity factor (light activity as default)
-    val activityFactor = 1.375
-
-    // Total Daily Energy Expenditure (TDEE)
-    val tdee = bmr * activityFactor
-
-    // Average number of steps per day (defaulting to 10,000 steps)
-    val averageStepsPerDay = 10000
-
-    // Calculate calories burned per step
-    val caloriesPerStep = tdee / averageStepsPerDay
-
-    // Calculate total calories burned for the given number of steps
-    return (steps * (caloriesPerStep / weight)).toInt()
-}
-
-sealed class BottomNavItem(val title: String, val icon: ImageVector, val route: String) {
-    object Chat : BottomNavItem("Messages", Icons.Filled.ChatBubble, "chat")
-    object Add : BottomNavItem("Add", Icons.Filled.Add,"add")
-    object Map : BottomNavItem("Map", Icons.Filled.Map, "map")
-    object Profile : BottomNavItem("Profile", Icons.Filled.Person, "profile")
 }

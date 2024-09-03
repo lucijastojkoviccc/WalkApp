@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    //id("com.google.gms.google-services")
-    //id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -109,7 +109,8 @@ dependencies {
     implementation(libs.compose.ui.viewbinding)
     implementation(libs.play.services.fitness)
     implementation(libs.play.services.auth)
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
 
-
+    implementation(libs.work.runtime.ktx)
 
 }

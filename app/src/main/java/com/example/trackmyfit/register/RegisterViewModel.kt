@@ -41,11 +41,11 @@ class RegisterViewModel : ViewModel() {
         _state.value = _state.value.copy(gender = newValue)
     }
 
-    fun onHeightChange(newValue: String) {
+    fun onHeightChange(newValue: Number) {
         _state.value = _state.value.copy(height = newValue)
     }
 
-    fun onWeightChange(newValue: String) {
+    fun onWeightChange(newValue: Number) {
         _state.value = _state.value.copy(weight = newValue)
     }
 
@@ -79,7 +79,7 @@ class RegisterViewModel : ViewModel() {
                                 }
                             }
                         } else {
-                            _state.value = _state.value.copy(error = task.exception?.message ?: "Registration failed")
+                            _state.value = _state.value.copy(error = "Registration failed")
                         }
                     }
             } catch (e: Exception) {
@@ -87,15 +87,17 @@ class RegisterViewModel : ViewModel() {
             }
         }
     }
+
     private fun saveUserDataToFirestore(userId: String, profileImageUrl: String?) {
+        // Obezbedi da se podaci za email i birthDate pravilno čuvaju
         val userData = mapOf(
             "firstName" to _state.value.firstName,
             "lastName" to _state.value.lastName,
-            "birthDate" to _state.value.birthDate,
+            "birthDate" to _state.value.birthDate, // Dodaj birthDate
             "gender" to _state.value.gender,
             "height" to _state.value.height,
             "weight" to _state.value.weight,
-            "email" to _state.value.email,
+            "email" to _state.value.email, // Dodaj email
             "profilePictureUrl" to profileImageUrl // Može biti null
         )
 
@@ -107,4 +109,5 @@ class RegisterViewModel : ViewModel() {
                 _state.value = _state.value.copy(error = e.message ?: "An error occurred")
             }
     }
+
 }

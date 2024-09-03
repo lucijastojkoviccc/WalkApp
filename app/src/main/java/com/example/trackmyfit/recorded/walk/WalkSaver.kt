@@ -1,4 +1,4 @@
-package com.example.trackmyfit.recorded
+package com.example.trackmyfit.recorded.walk
 
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
@@ -7,7 +7,6 @@ import android.util.Log
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
-import com.example.trackmyfit.recorded.Walk
 
 object WalkSaver {
     suspend fun saveWalkToDatabase(

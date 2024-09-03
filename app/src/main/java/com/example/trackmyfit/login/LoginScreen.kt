@@ -49,7 +49,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
             onValueChange = { email = it },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
-            //keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
         )
 
         OutlinedTextField(
@@ -57,13 +57,16 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
             onValueChange = { password = it },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+            visualTransformation = PasswordVisualTransformation()
 
         )
         //visualTransformation = PasswordVisualTransformation()
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { viewModel.login(email, password) }) {
+        Button(onClick = {
+            viewModel.login(email, password)
+        }) {
             Text(text = "Log In")
         }
 
@@ -82,18 +85,31 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
         Spacer(modifier = Modifier.height(16.dp))
 
         // Navigate to Register Screen
-        Text(
-            text = "Don't have an account? Sign in",
-            color = Color.Blue,
-            modifier = Modifier.clickable { navController.navigate("register") },
-            textDecoration = TextDecoration.Underline
-        )
+        Row {
+            // "Don't have an account?" Text
+            Text(
+                text = "Don't have an account?",
+                color = Color.Black, // Use your preferred color
+                modifier = Modifier.padding(end = 4.dp) // Small space between the texts
+            )
+
+            // "Sign in" Text with underline and clickable
+            Text(
+                text = "Sign in",
+                color = Color.Blue,
+                modifier = Modifier
+                    .clickable { navController.navigate("register") }, // Only "Sign in" is clickable
+                textDecoration = TextDecoration.Underline // Underline only "Sign in"
+            )
+        }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
         if (loginState is LoginState.Error) {
             Text(
-                text = (loginState as LoginState.Error).error,
+                //text = (loginState as LoginState.Error).error,
+                text=("Try again!"),
                 color = Color.Red
             )
         }

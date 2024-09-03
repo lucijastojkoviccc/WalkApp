@@ -5,20 +5,27 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.trackmyfit.register.RegisterScreen
 import com.example.trackmyfit.login.LoginScreen
 import com.example.trackmyfit.home.MainScreen
+import com.example.trackmyfit.home.chat.ChatListScreen
+//import com.example.trackmyfit.recorded.AddActivityScreen
+import com.example.trackmyfit.home.UserProfileScreen
 import com.example.trackmyfit.home.EditProfileScreen
-import com.example.trackmyfit.home.AddSpotScreen
-import com.example.trackmyfit.home.ChatScreen
+import com.example.trackmyfit.home.map.AddSpotScreen
+import com.example.trackmyfit.home.chat.ChatScreen
+import com.example.trackmyfit.home.map.ShowSpotScreen
+import com.example.trackmyfit.home.map.MapScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import android.util.Log
 @Composable
-
 fun AppNavHost(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController,
+    startDestination: String
 ) {
-    NavHost(navController = navController, startDestination = "register") {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("login") {
             LoginScreen(navController = navController)
         }
@@ -28,21 +35,58 @@ fun AppNavHost(
         composable("home") {
             MainScreen(navController = navController)
         }
+        composable(BottomNavItem.Chat.route) {
+            ChatListScreen(navController = navController)
+        }
+        composable(BottomNavItem.Add.route) {
+            //AddActivityScreen(navController)
+        }
+        composable("map"/*BottomNavItem.Map.route*/) {
+            MapScreen(navController = navController)
+        }
+        composable(BottomNavItem.Profile.route) {
+            UserProfileScreen(navController = navController)
+        }
         composable("editProfile") {
             EditProfileScreen(navController = navController)
         }
-
-        composable("chat/{chatId}") { backStackEntry ->
-            val chatId = backStackEntry.arguments?.getString("chatId")
-            ChatScreen(navController = navController, chatId = chatId!!)
+        composable(
+            route = "chat/{clickedUserId}",
+            arguments = listOf(navArgument("clickedUserId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val clickedUserId = backStackEntry.arguments?.getString("clickedUserId") ?: ""
+            Log.d("NavigationAA", "Navigating to ChatScreen with userId: $clickedUserId")
+            ChatScreen(navController = navController, clickedUserId = clickedUserId)
+            Log.d("NavigationAA", "Finished navigation to ChatScreen")
         }
-        composable("add_spot/{latitude}/{longitude}") { backStackEntry ->
+
+
+
+        composable("show_spot/{spotId}") { backStackEntry ->
+            val spotId = backStackEntry.arguments?.getString("spotId")
+            if (spotId != null) {
+                ShowSpotScreen(navController = navController, spotId = spotId)
+            }
+        }
+        composable(
+            route = "add_spot/{latitude}/{longitude}",
+            arguments = listOf(
+                navArgument("latitude") { type = NavType.StringType },
+                navArgument("longitude") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
             val latitude = backStackEntry.arguments?.getString("latitude")?.toDoubleOrNull()
             val longitude = backStackEntry.arguments?.getString("longitude")?.toDoubleOrNull()
-            AddSpotScreen(navController = navController, latitude = latitude, longitude = longitude)
+
+            if (latitude != null && longitude != null) {
+                AddSpotScreen(
+                    navController = navController,  // Dodaj ovaj parametar
+                    latitude = latitude,
+                    longitude = longitude
+                )
+            }
         }
-
-
 
     }
 }
+
