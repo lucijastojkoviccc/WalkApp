@@ -33,6 +33,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Divider
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +43,7 @@ fun ShowSpotScreen(navController: NavHostController, spotId: String, viewModel: 
     var showDialog by remember { mutableStateOf(false) }
     var selectedActivities by remember { mutableStateOf(listOf<String>()) }
     val allActivities = listOf("Running", "Cycling", "Rollerblade", "Hiking", "Gym", "Outdoor gym")
+
     LaunchedEffect(spotId) {
         viewModel.getWorkoutSpotById(spotId) { spot ->
             workoutSpot = spot
@@ -60,30 +62,47 @@ fun ShowSpotScreen(navController: NavHostController, spotId: String, viewModel: 
                 }
             )
         },
-        content = { paddingValues -> // Use 'paddingValues' passed to the content parameter
+        content = { paddingValues ->
             workoutSpot?.let { spot ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues) // Apply the padding to the root container
-                        .padding(16.dp) // You can also combine additional padding if needed
+                        .padding(paddingValues)
+                        .padding(16.dp)
                 ) {
-                    Text(text = spot.name, style = MaterialTheme.typography.headlineSmall)
+                    // Ime workout spota - ljubičasta boja i veći font
+                    Text(
+                        text = spot.name,
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // "Activities" i plus ikona - veći font
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Activities", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = "Activities",
+                            style = MaterialTheme.typography.headlineSmall // Povećan font za "Activities"
+                        )
                         IconButton(onClick = { showDialog = true }) {
                             Icon(Icons.Default.Add, contentDescription = "Add Activity")
                         }
                     }
 
+                    // Lista aktivnosti - veći font i Divider između stavki
                     LazyColumn {
                         items(spot.activities) { activity ->
-                            Text(text = activity, style = MaterialTheme.typography.bodyLarge)
+                            Column {
+                                Text(
+                                    text = activity,
+                                    style = MaterialTheme.typography.bodyLarge // Povećan font za aktivnosti
+                                )
+                                Divider(modifier = Modifier.padding(vertical = 8.dp)) // Divider između aktivnosti
+                            }
                         }
                     }
                 }
@@ -104,13 +123,11 @@ fun ShowSpotScreen(navController: NavHostController, spotId: String, viewModel: 
             allActivities = allActivities,
             onDismiss = { showDialog = false },
             onSave = { newActivities ->
-                // Update spot with new activities in the database
                 val updatedActivities = workoutSpot?.activities?.toMutableList()?.apply {
                     addAll(newActivities)
                 }
                 if (updatedActivities != null) {
                     viewModel.updateWorkoutSpotActivities(spotId, updatedActivities) {
-                        // Update local state and close dialog
                         workoutSpot = workoutSpot?.copy(activities = updatedActivities)
                         showDialog = false
                     }

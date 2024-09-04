@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,6 +35,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.google.accompanist.permissions.shouldShowRationale
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Text
+import androidx.compose.runtime.remember
+import androidx.compose.ui.window.DialogProperties
+import com.google.firebase.firestore.FirebaseFirestore
+import android.os.Handler
+import android.os.Looper
+import com.google.android.gms.maps.model.Marker
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPermissionsApi::class)
@@ -44,13 +55,58 @@ fun MapScreen(navController: NavHostController) {
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var googleMap by remember { mutableStateOf<GoogleMap?>(null) }
     var currentLocation by remember { mutableStateOf<Location?>(null) }
-    val workoutSpots = remember { mutableStateListOf<WorkoutSpot>() }
+    val handler = Handler(Looper.getMainLooper())
+    var lastClickedMarker: Marker? = null
+    var isDoubleClick = false
+    // Originalna lista workout spotova
+    val allWorkoutSpots = remember { mutableStateListOf<WorkoutSpot>() }
+    // Filtrirana lista workout spotova koja će se prikazati na mapi
+    var filteredWorkoutSpots by remember { mutableStateOf(listOf<WorkoutSpot>()) }
 
     val locationPermissionState = rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
 
     // State to manage search visibility
     var isSearchVisible by remember { mutableStateOf(false) }
     val searchItems = listOf("Running", "Cycling", "Rollerblade", "Hiking", "Gym", "Outdoor gym")
+    val selectedItems = remember { mutableStateListOf<String>() }
+
+    // Funkcija za učitavanje podataka iz Firestore-a
+    LaunchedEffect(Unit) {
+        FirebaseFirestore.getInstance().collection("workoutspots")
+            .get()
+            .addOnSuccessListener { documents ->
+                val spots = documents.mapNotNull {
+                    it.toObject(WorkoutSpot::class.java).apply { id = it.id }  // Preuzmi ID iz Firestore-a
+                }
+                allWorkoutSpots.clear()
+                allWorkoutSpots.addAll(spots)
+                filteredWorkoutSpots = spots
+
+                // Prikazivanje svih workout spotova
+                googleMap?.clear()
+
+                // Prikaz trenutne lokacije korisnika
+                currentLocation?.let { location ->
+                    val userLatLng = LatLng(location.latitude, location.longitude)
+                    googleMap?.addMarker(
+                        MarkerOptions()
+                            .position(userLatLng)
+                            .title("Your Location")
+                    )
+                }
+
+                // Prikazivanje svih workout spotova
+                allWorkoutSpots.forEach { spot ->
+                    val marker = googleMap?.addMarker(
+                        MarkerOptions()
+                            .position(LatLng(spot.latitude, spot.longitude))
+                            .title(spot.name)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)) // Ljubičasti pin
+                    )
+                    marker?.tag = spot.id  // Dodeljivanje ID kao tag markera
+                }
+            }
+    }
 
     when {
         locationPermissionState.status.isGranted -> {
@@ -63,26 +119,12 @@ fun MapScreen(navController: NavHostController) {
 
                         googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 15f))
 
+                        // Prikaz trenutne lokacije odmah po otvaranju mape
                         googleMap?.addMarker(
                             MarkerOptions()
                                 .position(userLatLng)
                                 .title("Your Location")
                         )
-
-                        workoutSpots.forEach { spot ->
-                            googleMap?.addMarker(
-                                MarkerOptions()
-                                    .position(LatLng(spot.latitude, spot.longitude))
-                                    .title(spot.name)
-                            )?.apply {
-                                googleMap?.setOnMarkerClickListener { marker ->
-                                    if (marker.title == spot.name) {
-                                        navController.navigate("show_spot/${spot.id}")
-                                    }
-                                    true
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -125,20 +167,38 @@ fun MapScreen(navController: NavHostController) {
                             googleMap = map
                             googleMap?.uiSettings?.isZoomControlsEnabled = true
 
-                            workoutSpots.forEach { spot ->
+                            // Prikazivanje svih workout spotova i trenutne lokacije
+                            googleMap?.clear()
+
+                            // Prikaz trenutne lokacije korisnika
+                            currentLocation?.let { location ->
+                                val userLatLng = LatLng(location.latitude, location.longitude)
                                 googleMap?.addMarker(
+                                    MarkerOptions()
+                                        .position(userLatLng)
+                                        .title("Your Location")
+                                )
+                            }
+
+                            // Prikaz filtriranih workout spotova
+                            filteredWorkoutSpots.forEach { spot ->
+                                val marker = googleMap?.addMarker(
                                     MarkerOptions()
                                         .position(LatLng(spot.latitude, spot.longitude))
                                         .title(spot.name)
-                                )?.apply {
-                                    googleMap?.setOnMarkerClickListener { marker ->
-                                        val spot = workoutSpots.find { it.name == marker.title }
-                                        if (spot != null) {
-                                            navController.navigate("show_spot/${spot.id}")
-                                        }
-                                        true
-                                    }
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)) // Ljubičasti pin
+                                )
+                                marker?.tag = spot.id  // Dodeljivanje ID kao tag markera
+                            }
+
+                            // Postavljanje klik listenera za markere
+                            googleMap?.setOnMarkerClickListener { marker ->
+                                val spotId = marker.tag as? String
+                                if (spotId != null) {
+                                    navController.navigate("show_spot/$spotId") // Navigacija na ShowSpotScreen sa prosleđenim id-em
                                 }
+                                marker.hideInfoWindow() // Ručno zatvori InfoWindow nakon klika
+                                true     // Vrati true da spreči InfoWindow
                             }
                         }
                     }
@@ -151,7 +211,7 @@ fun MapScreen(navController: NavHostController) {
         // FloatingActionButton for search
         FloatingActionButton(
             onClick = {
-                isSearchVisible = true  // Svaki put kada se klikne, lista će postati vidljiva
+                isSearchVisible = true  // Svaki put kada se klikne, dijalog će postati vidljiv
             },
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -184,34 +244,94 @@ fun MapScreen(navController: NavHostController) {
             )
         }
 
-        // Display LazyColumn for search items when search is visible
+        // Display dialog for search items when search is visible
         if (isSearchVisible) {
-            LazyColumn(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(16.dp)
-                    .background(Color.White)
-                    .fillMaxWidth()
-            ) {
-                items(searchItems) { item ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                // Handle click on each item here
-                                // Možeš navigirati, filtrirati ili obraditi klik na stavku
+            AlertDialog(
+                onDismissRequest = { isSearchVisible = false },
+                title = { Text(text = "Filter Activities") },
+                text = {
+                    LazyColumn {
+                        items(searchItems) { item ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = selectedItems.contains(item),
+                                    onCheckedChange = { isChecked ->
+                                        if (isChecked) {
+                                            selectedItems.add(item)
+                                        } else {
+                                            selectedItems.remove(item)
+                                        }
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = item)
                             }
-                    ) {
-                        Text(
-                            text = item,
-                            modifier = Modifier
-                                .padding(8.dp),
-                            style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
-                        )
-                        Divider(color = Color.Gray, thickness = 1.dp)
+                        }
                     }
-                }
-            }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            // Implement filter logic here
+                            filteredWorkoutSpots = allWorkoutSpots.filter { spot ->
+                                spot.activities.any { it in selectedItems }
+                            }
+
+                            // Zatvori dijalog nakon filtriranja
+                            isSearchVisible = false
+
+                            // Očisti sve markere sa mape i dodaj nove filtrirane markere
+                            googleMap?.clear()
+
+                            // Prikaz trenutne lokacije korisnika
+                            currentLocation?.let { location ->
+                                val userLatLng = LatLng(location.latitude, location.longitude)
+                                googleMap?.addMarker(
+                                    MarkerOptions()
+                                        .position(userLatLng)
+                                        .title("Your Location")
+                                )
+                            }
+
+                            // Prikaz filtriranih workout spotova
+                            filteredWorkoutSpots.forEach { spot ->
+                                val marker = googleMap?.addMarker(
+                                    MarkerOptions()
+                                        .position(LatLng(spot.latitude, spot.longitude))
+                                        .title(spot.name)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)) // Ljubičasti pin
+                                )
+                                marker?.tag = spot.id  // Dodeljivanje ID kao tag markera
+                            }
+
+                            // Postavljanje klik listenera za markere
+                            googleMap?.setOnMarkerClickListener { marker ->
+                                val spotId = marker.tag as? String
+                                if (spotId != null) {
+                                    navController.navigate("show_spot/$spotId") // Navigacija na ShowSpotScreen sa prosleđenim id-em
+                                }
+                                marker.hideInfoWindow() // Ručno zatvori InfoWindow nakon klika
+                                true     // Vrati true da zadrži standardno ponašanje markera
+                            }
+                        }
+                    ) {
+                        Text("Filter")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { isSearchVisible = false }
+                    ) {
+                        Text("Cancel")
+                    }
+                },
+                properties = DialogProperties(dismissOnClickOutside = false)
+            )
         }
     }
 }

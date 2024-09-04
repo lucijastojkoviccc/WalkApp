@@ -25,6 +25,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.Text
+import com.example.trackmyfit.BottomNavItem
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
@@ -69,6 +73,12 @@ fun UserProfileScreen(navController: NavController) {
             isLoading = false
         }
     }
+    val items = listOf(
+        BottomNavItem.Chat,
+        BottomNavItem.Add,
+        BottomNavItem.Map,
+        BottomNavItem.Profile
+    )
 
 
     Scaffold(
@@ -84,6 +94,29 @@ fun UserProfileScreen(navController: NavController) {
                     }
                 }
             )
+        },
+        bottomBar = {
+            BottomNavigation {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                items.forEach { item ->
+                    BottomNavigationItem(
+                        icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
+                        label = { Text(text = item.title) },
+                        selected = currentRoute == item.route,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.startDestinationRoute ?: "home") {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            }
         }
     ) { paddingValues ->
         if (isLoading) {
