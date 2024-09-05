@@ -10,16 +10,11 @@ sealed class BottomNavItem(
     val icon: ImageVector,
     val title: String
 ) {
-    object Chat : BottomNavItem(
-        route = "chatList",
-        icon = Icons.Default.Chat,
-        title = "ChatList"
-    )
 
-    object Add : BottomNavItem(
-        route = "add",
-        icon = Icons.Default.Add,
-        title = "Add"
+    object Search : BottomNavItem(
+        route = "search",
+        icon = Icons.Default.Search,
+        title = "Search"
     )
 
     object Map : BottomNavItem(
@@ -27,7 +22,11 @@ sealed class BottomNavItem(
         icon = Icons.Default.Map,
         title = "Map"
     )
-
+    object Add : BottomNavItem(
+        route = "add",
+        icon = Icons.Default.Add,
+        title = "Add"
+    )
     object Profile : BottomNavItem(
         route = "profile",
         icon = Icons.Default.Person,

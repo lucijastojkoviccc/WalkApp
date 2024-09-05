@@ -1,0 +1,127 @@
+package com.example.trackmyfit.home.search
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*  // This allows you to access filled icons
+import androidx.compose.material.icons.outlined.*  // This allows you to access outlined icons
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import coil.compose.rememberImagePainter
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.input.TextFieldValue
+import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.graphics.Color
+import com.example.trackmyfit.AppNavHost
+import android.util.Log
+import androidx.compose.foundation.lazy.items
+
+
+@Composable
+
+fun SearchScreen(
+    navController: NavHostController,
+    viewModel: SearchViewModel = viewModel()
+) {
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+    val searchResults: List<User> = viewModel.searchResults.collectAsState().value
+    val coroutineScope = rememberCoroutineScope()
+
+    // Trigger search when the query changes
+    LaunchedEffect(searchQuery.text) {
+        viewModel.searchUsers(searchQuery.text)
+    }
+
+    // Main Column that fills the screen
+    Column(modifier = Modifier
+        .fillMaxSize()  // Ensures the column takes up the entire screen
+        .padding(16.dp)) {
+
+        // Title
+        Text(text = "Search Users", style = MaterialTheme.typography.h6)
+
+        // Search input field
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { query ->
+                searchQuery = query
+            },
+            label = { Text("Enter name and surname") },
+            leadingIcon = {
+                Icon(Icons.Filled.Search, contentDescription = "Search")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        )
+
+        // Check if searchResults is not empty before rendering LazyColumn
+        if (searchResults.isNotEmpty()) {
+            // Lazy list of search results
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()  // LazyColumn now takes up the remaining screen space
+            ) {
+                items(searchResults) { user ->
+                    UserListItem(user = user, onClick = {
+                        coroutineScope.launch {
+                            navController.navigate("otherUserProfile/${user.id}")
+                        }
+                    })
+                }
+            }
+        } else {
+            // Display when no users are found
+            Text(text = "No users found", modifier = Modifier.padding(top = 16.dp))
+        }
+    }
+}
+
+@Composable
+fun UserListItem(user: User, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Profile picture
+        Image(
+            painter = rememberAsyncImagePainter(model = user.profilePictureUrl),
+            contentDescription = null,
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+
+        // User name
+        Column {
+            Text(
+                text = "${user.firstName} ${user.lastName}",
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+
+
+

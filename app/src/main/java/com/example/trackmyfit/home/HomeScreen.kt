@@ -32,7 +32,7 @@ import android.widget.Toast
 @Composable
 fun MainScreen(navController: NavHostController) {
     val items = listOf(
-        BottomNavItem.Chat,
+        BottomNavItem.Search,
         BottomNavItem.Add,
         BottomNavItem.Map,
         BottomNavItem.Profile

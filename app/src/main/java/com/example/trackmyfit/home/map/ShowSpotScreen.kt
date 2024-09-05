@@ -34,21 +34,52 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Divider
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
+import androidx.compose.ui.unit.dp
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.Date
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import coil.compose.rememberImagePainter
+import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 
+import androidx.compose.ui.text.input.TextFieldValue
+import com.example.trackmyfit.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowSpotScreen(navController: NavHostController, spotId: String, viewModel: SpotViewModel = viewModel()) {
+fun ShowSpotScreen(
+    navController: NavHostController,
+    spotId: String,
+    viewModel: SpotViewModel = viewModel()
+) {
     var workoutSpot by remember { mutableStateOf<WorkoutSpot?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     var selectedActivities by remember { mutableStateOf(listOf<String>()) }
     val allActivities = listOf("Running", "Cycling", "Rollerblade", "Hiking", "Gym", "Outdoor gym")
+    var showCommentDialog by remember { mutableStateOf(false) }
+    var commentText by remember { mutableStateOf("") }
+    val comments by viewModel.comments.collectAsState(initial = emptyList())
 
     LaunchedEffect(spotId) {
         viewModel.getWorkoutSpotById(spotId) { spot ->
             workoutSpot = spot
             selectedActivities = spot?.activities ?: emptyList()
         }
+        viewModel.getCommentsForSpot(spotId) // Fetch comments for this spot
     }
 
     Scaffold(
@@ -70,7 +101,7 @@ fun ShowSpotScreen(navController: NavHostController, spotId: String, viewModel: 
                         .padding(paddingValues)
                         .padding(16.dp)
                 ) {
-                    // Ime workout spota - ljubičasta boja i veći font
+                    // Ime workout spota
                     Text(
                         text = spot.name,
                         style = MaterialTheme.typography.headlineLarge.copy(
@@ -80,29 +111,55 @@ fun ShowSpotScreen(navController: NavHostController, spotId: String, viewModel: 
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // "Activities" i plus ikona - veći font
+                    // "Activities" i plus ikona
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Activities",
-                            style = MaterialTheme.typography.headlineSmall // Povećan font za "Activities"
+                            style = MaterialTheme.typography.headlineSmall
                         )
                         IconButton(onClick = { showDialog = true }) {
                             Icon(Icons.Default.Add, contentDescription = "Add Activity")
                         }
                     }
 
-                    // Lista aktivnosti - veći font i Divider između stavki
+                    // Lista aktivnosti
                     LazyColumn {
                         items(spot.activities) { activity ->
                             Column {
                                 Text(
                                     text = activity,
-                                    style = MaterialTheme.typography.bodyLarge // Povećan font za aktivnosti
+                                    style = MaterialTheme.typography.bodyLarge
                                 )
-                                Divider(modifier = Modifier.padding(vertical = 8.dp)) // Divider između aktivnosti
+                                Divider(modifier = Modifier.padding(vertical = 8.dp))
                             }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // "Comments" deo
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Comments",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        IconButton(onClick = { showCommentDialog = true }) {
+                            Icon(Icons.Default.Add, contentDescription = "Add Comment")
+                        }
+                    }
+
+                    // Lista komentara, sortirana po najnovijim na vrhu
+                    LazyColumn {
+                        items(comments) { comment ->
+                            CommentItem(
+                                comment = comment,
+                                navController = navController  // Prosleđivanje navController-a za navigaciju
+                            )
+                            Divider(modifier = Modifier.padding(vertical = 8.dp))
                         }
                     }
                 }
@@ -135,7 +192,90 @@ fun ShowSpotScreen(navController: NavHostController, spotId: String, viewModel: 
             }
         )
     }
+
+    if (showCommentDialog) {
+        AddCommentDialog(
+            commentText = commentText,
+            onDismiss = { showCommentDialog = false },
+            onSave = { newComment ->
+                viewModel.addComment(spotId, newComment) {
+                    showCommentDialog = false
+                }
+            }
+        )
+    }
 }
+
+@Composable
+fun CommentItem(
+    comment: Comment,
+    navController: NavHostController,  // Dodajemo NavHostController za navigaciju
+    viewModel: SpotViewModel = viewModel()
+) {
+    var user by remember { mutableStateOf<UserComm?>(null) }
+
+    // Pokrećemo povlačenje podataka o korisniku na osnovu userId
+    LaunchedEffect(comment.userId) {
+        viewModel.getUserData(comment.userId) { fetchedUser ->
+            user = fetchedUser
+        }
+    }
+
+    // Koristimo Modifier.clickable da omogućimo klikanje na CommentItem
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                // Navigacija ka profilu korisnika koji je ostavio komentar
+                navController.navigate("otherUserProfile/${comment.userId}")
+            }
+            .padding(vertical = 8.dp)
+    ) {
+        // Prikaz profilne slike
+        val profileImageUrl = user?.profilePictureUrl
+        Image(
+            painter = if (profileImageUrl != null) {
+                rememberImagePainter(data = profileImageUrl)
+            } else {
+                painterResource(id = R.drawable.person) // Placeholder za default sliku
+            },
+            contentDescription = "Profile Picture",
+            modifier = Modifier.size(40.dp),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        // Prikazivanje imena ili "You" za trenutnog korisnika
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        Text(
+            text = if (currentUser?.uid == comment.userId) "You" else "${user?.firstName ?: ""} ${user?.lastName ?: ""}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Datum i vreme komentara
+        comment.timestamp?.let { timestamp ->
+            val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+            val date = (timestamp as? com.google.firebase.Timestamp)?.toDate()
+            Text(text = sdf.format(date ?: Date()))
+        }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    // Prikazivanje samog komentara ispod imena
+    Text(
+        text = comment.text,
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.padding(start = 48.dp) // Pomeri tekst komentara ispod slike
+    )
+}
+
+
+
 @Composable
 fun AddActivityDialog(
     currentActivities: List<String>,
@@ -174,6 +314,39 @@ fun AddActivityDialog(
         },
         confirmButton = {
             Button(onClick = { onSave(selectedNewActivities) }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(onClick = { onDismiss() }) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+@Composable
+fun AddCommentDialog(
+    commentText: String,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    var newComment by remember { mutableStateOf(TextFieldValue(commentText)) }
+
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text(text = "Add Comment") },
+        text = {
+            Column {
+                Text("Enter your comment below:")
+                BasicTextField(
+                    value = newComment,
+                    onValueChange = { newComment = it },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onSave(newComment.text) }) {
                 Text("Save")
             }
         },
