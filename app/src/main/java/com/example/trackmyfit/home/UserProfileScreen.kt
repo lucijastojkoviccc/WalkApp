@@ -29,17 +29,23 @@ import com.example.trackmyfit.BottomNavItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-
-import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
 import android.util.Log
+import com.google.firebase.firestore.Query
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import java.util.*
+
+
 @Composable
 fun UserProfileScreen(navController: NavController) {
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -308,74 +314,99 @@ data class WalkData(
 
 @Composable
 fun SleepingTabContent() {
-//    val context = LocalContext.current
-//    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-//    var sleepSessions by remember { mutableStateOf<List<SleepSession>>(emptyList()) }
-//
-//    LaunchedEffect(Unit) {
-//        val db = FirebaseFirestore.getInstance()
-//        val querySnapshot = db.collection("sleep")
-//            .whereEqualTo("userId", userId)
-//            .orderBy("date")
-//            .get()
-//            .await()
-//
-//        sleepSessions = querySnapshot.documents.mapNotNull { document ->
-//            val length = document.getDouble("length")?.toFloat() ?: return@mapNotNull null
-//            val dateString = document.getString("date") ?: return@mapNotNull null
-//            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-//            val date = dateFormat.parse(dateString) ?: return@mapNotNull null
-//            SleepSession(length, date)
-//        }
-//    }
-//
-//    // Horizontal scrolling for the sleep bars
-//    LazyRow(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(16.dp)
-//    ) {
-//        // Using the `items` function that takes a list
-//        items(sleepSessions) { session ->
-//            SleepBar(length = session.length, date = session.date)
-//        }
-//    }
-    Text("Sleep content goes here")
+    val context = LocalContext.current
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    var sleepSessions by remember { mutableStateOf<Map<String, Int>>(emptyMap()) } // Map of date to total minutes
+
+    LaunchedEffect(Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val querySnapshot = db.collection("sleep")
+            .whereEqualTo("userId", userId)
+            .orderBy("date", Query.Direction.DESCENDING)
+            .get()
+            .await()
+
+        // Group sleep sessions by date and sum their lengths
+        val groupedSessions = querySnapshot.documents
+            .groupBy { document ->
+                document.getString("date") ?: "" // Group by the date
+            }.mapValues { entry ->
+                entry.value.sumBy { document ->
+                    extractMinutesFromLength(document.getString("length") ?: "0min") // Sum the sleep lengths
+                }
+            }.filterKeys { it.isNotEmpty() } // Remove empty dates if any
+
+        sleepSessions = groupedSessions.toSortedMap(compareByDescending { it }) // Sort by descending date
+    }
+
+    // Horizontal scrolling for the sleep bars
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        // Using the `items` function that takes a map
+        items(sleepSessions.toList()) { (dateString, totalMinutes) ->
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val date = dateFormat.parse(dateString) ?: Date()
+            SleepBar(totalMinutes = totalMinutes, date = date)
+        }
+    }
 }
 
-//@Composable
-//fun SleepBar(length: Float, date: Date) {
-//    val maxHours = 24f // Maximum height for the bar based on 24 hours
-//    val barHeightRatio = length / maxHours
-//
-//    // Format the date to day/month
-//    val dateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
-//    val formattedDate = dateFormat.format(date)
-//
-//    Column(
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        modifier = Modifier.padding(horizontal = 8.dp)
-//    ) {
-//        Canvas(
-//            modifier = Modifier
-//                .height(150.dp)
-//                .width(30.dp)
-//        ) {
-//            // Draw the bar based on the sleep length
-//            drawRect(
-//                color = Color(0xFFD7BDE2), // Using the requested color
-//                size = size.copy(height = size.height * barHeightRatio)
-//            )
-//        }
-//
-//        Spacer(modifier = Modifier.height(4.dp))
-//
-//        // Display the formatted date under the bar
-//        Text(text = formattedDate, fontSize = 12.sp)
-//    }
-//}
+@Composable
+fun SleepBar(totalMinutes: Int, date: Date) {
+    val maxMinutes = 24 * 60f // Maximum height for the bar based on 24 hours in minutes
+    val barHeightRatio = totalMinutes / maxMinutes
 
-data class SleepSession(val length: Float, val date: Date)
+    // Format the date to day/month
+    val dateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
+    val formattedDate = dateFormat.format(date)
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(horizontal = 8.dp)
+    ) {
+        // The Canvas will draw the bar from the bottom up with rounded corners
+        Canvas(
+            modifier = Modifier
+                .height(150.dp) // Total height for the bars
+                .width(15.dp)   // Reduced width for the bars (half the original)
+        ) {
+            val barHeight = size.height * barHeightRatio
+            val cornerRadius = 8.dp.toPx() // Set the corner radius for the bars
+
+            drawRoundRect(
+                color = Color(0xFFD7BDE2), // Using the requested color
+                topLeft = Offset(0f, size.height - barHeight), // Start from bottom
+                size = Size(size.width, barHeight), // Adjust height dynamically
+                cornerRadius = CornerRadius(cornerRadius, cornerRadius) // Rounded corners
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Display the formatted date under the bar
+        Text(text = formattedDate, fontSize = 12.sp)
+    }
+}
+
+// Function to extract total minutes from a string like "8h 30min"
+fun extractMinutesFromLength(length: String): Int {
+    val hoursRegex = "(\\d+)h".toRegex() // Match the hours
+    val minutesRegex = "(\\d+)min".toRegex() // Match the minutes
+
+    val hoursMatch = hoursRegex.find(length)
+    val minutesMatch = minutesRegex.find(length)
+
+    val hours = hoursMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    val minutes = minutesMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
+
+    return (hours * 60) + minutes // Convert hours to minutes and add
+}
+
+
+data class SleepSession(val length: String, val date: Date)
 
 @Composable
 fun ActivitiesTabContent(user: UserData) {

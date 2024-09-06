@@ -86,31 +86,6 @@ fun HomeScreenContent(
     val scope = rememberCoroutineScope()
 
     val stepCount by viewModel.stepCount.collectAsState()
-//    val caloriesBurned = viewModel.calculateCaloriesBurned(stepCount, weight = 70f, height = 1.7f, age = 25, gender = "male")
-//    val distanceWalked = viewModel.calculateDistanceWalked(stepCount, height = 1.7f, gender = "male")
-    // Učitavanje koraka iz SharedPreferences-a
-    //val sharedPreferences = context.getSharedPreferences("StepCounterPrefs", Context.MODE_PRIVATE)
-    //val stepCount = remember { mutableStateOf(sharedPreferences.getInt("totalSteps", 0)) }
-
-    // Kada se ekran pokrene, učitavamo broj koraka iz SharedPreferences
-//    LaunchedEffect(Unit) {
-//        // Osvježavanje podataka iz SharedPreferences kada se aplikacija otvori
-//        stepCount.value = sharedPreferences.getInt("totalSteps", 0)
-//    }
-//
-//    DisposableEffect(Unit) {
-//        // Kada je ekran aktivan, učitaj korake u realnom vremenu
-//        val listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-//            if (key == "totalSteps") {
-//                stepCount.value = prefs.getInt("totalSteps", 0)
-//            }
-//        }
-//        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
-//
-//        onDispose {
-//            sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener)
-//        }
-//    }
 
     // State za čuvanje podataka o korisniku
     var weight by remember { mutableStateOf(70f) }

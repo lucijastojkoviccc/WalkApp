@@ -32,14 +32,22 @@ import androidx.compose.ui.graphics.Color
 import com.example.trackmyfit.AppNavHost
 import android.util.Log
 import androidx.compose.foundation.lazy.items
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.trackmyfit.BottomNavItem
 
 
 @Composable
-
 fun SearchScreen(
     navController: NavHostController,
     viewModel: SearchViewModel = viewModel()
 ) {
+    val items = listOf(
+        BottomNavItem.Search,
+        BottomNavItem.Add,
+        BottomNavItem.Map,
+        BottomNavItem.Profile
+    )
+
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     val searchResults: List<User> = viewModel.searchResults.collectAsState().value
     val coroutineScope = rememberCoroutineScope()
@@ -49,49 +57,84 @@ fun SearchScreen(
         viewModel.searchUsers(searchQuery.text)
     }
 
-    // Main Column that fills the screen
-    Column(modifier = Modifier
-        .fillMaxSize()  // Ensures the column takes up the entire screen
-        .padding(16.dp)) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Search Users", color = Color.White) },
+                backgroundColor = Color(0xFF6200EE)
+            )},
+        bottomBar = {
+            BottomNavigation {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
 
-        // Title
-        Text(text = "Search Users", style = MaterialTheme.typography.h6)
-
-        // Search input field
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { query ->
-                searchQuery = query
-            },
-            label = { Text("Enter name and surname") },
-            leadingIcon = {
-                Icon(Icons.Filled.Search, contentDescription = "Search")
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-
-        // Check if searchResults is not empty before rendering LazyColumn
-        if (searchResults.isNotEmpty()) {
-            // Lazy list of search results
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()  // LazyColumn now takes up the remaining screen space
-            ) {
-                items(searchResults) { user ->
-                    UserListItem(user = user, onClick = {
-                        coroutineScope.launch {
-                            navController.navigate("otherUserProfile/${user.id}")
+                items.forEach { item ->
+                    BottomNavigationItem(
+                        icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
+                        label = { Text(text = item.title) },
+                        selected = currentRoute == item.route,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.startDestinationRoute ?: "home") {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
-                    })
+                    )
                 }
             }
-        } else {
-            // Display when no users are found
-            Text(text = "No users found", modifier = Modifier.padding(top = 16.dp))
+        }
+    ) { innerPadding ->
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(16.dp)) {
+
+            // Title
+            //Text(text = "Search Users", style = MaterialTheme.typography.h6)
+
+            // Search input field
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { query ->
+                    searchQuery = query
+                },
+                label = { Text("Enter name and surname") },
+                leadingIcon = {
+                    Icon(Icons.Filled.Search, contentDescription = "Search")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+
+            // Check if searchResults is not empty before rendering LazyColumn
+            if (searchResults.isNotEmpty()) {
+                // Lazy list of search results
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(searchResults) { user ->
+                        UserListItem(user = user, onClick = {
+                            coroutineScope.launch {
+                                navController.navigate("otherUserProfile/${user.id}")
+                            }
+                        })
+                    }
+                }
+            } else {
+                // Display when no users are found
+                Text(text = "No users found", modifier = Modifier.padding(top = 16.dp))
+            }
         }
     }
 }
+
+
+
+
 
 @Composable
 fun UserListItem(user: User, onClick: () -> Unit) {
