@@ -1,4 +1,5 @@
 package com.example.trackmyfit.home
+import android.content.pm.PackageManager
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import android.util.Log
@@ -28,6 +29,15 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.core.content.ContextCompat
+import java.text.SimpleDateFormat
+import java.util.Date
+
+
 
 @Composable
 fun MainScreen(navController: NavHostController) {
@@ -76,15 +86,14 @@ fun MainScreen(navController: NavHostController) {
 fun Home(modifier: Modifier = Modifier) {
     Text(text = "")
 }
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreenContent(
     viewModel: StepCounterViewModel = viewModel(),
     sleepViewModel: SleepViewModel = viewModel()
 ) {
     val context = LocalContext.current
-//    val stepCount by viewModel.stepCount.collectAsState()
     val scope = rememberCoroutineScope()
-
     val stepCount by viewModel.stepCount.collectAsState()
 
     // State za čuvanje podataka o korisniku
@@ -143,7 +152,34 @@ fun HomeScreenContent(
             }
         }
     }
+//    DisposableEffect(Unit) {
+//        onDispose {
+//            // Unregister sensor when composable leaves the composition
+//            viewModel.unregisterSensor()
+//        }
+//    }
+    var permissionGranted by remember { mutableStateOf(false) }
 
+    // Only request permission on Android 10 (API 29) or higher
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+        RequestPermission(permission = android.Manifest.permission.ACTIVITY_RECOGNITION) {
+            permissionGranted = true
+        }
+    } else {
+        // No need for permission on Android 8.0.0 and lower
+        permissionGranted = true
+    }
+
+    // Register/Unregister Sensor when Composable is active
+    if (permissionGranted) {
+        DisposableEffect(Unit) {
+            viewModel.registerSensor()
+
+            onDispose {
+                viewModel.unregisterSensor()
+            }
+        }
+    }
     val caloriesBurned = viewModel.calculateCaloriesBurned(stepCount, weight, heightinm, age, gender)
     val distanceWalked = viewModel.calculateDistanceWalked(stepCount, heightinm, gender)
 
@@ -168,15 +204,30 @@ fun HomeScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
-                .padding(top = 20.dp),
+                .padding(top = 20.dp)
+                .combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        // Save walk data before resetting
+                        //saveWalkData(stepCount, caloriesBurned.toFloat(), distanceWalked)
+                        scope.launch {
+                            saveWalkData(
+                                stepCount = stepCount,
+                                calories = caloriesBurned.toFloat(),
+                                distance = distanceWalked
+                            )
+                        }
+                        viewModel.resetStepCount()
+                    }
+                ),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(modifier = Modifier.size(250.dp)) {
-                drawCircle(
-                    color = Color(0xFFD7BDE2), // Svetlo ljubičasta boja
-                    style = Stroke(width = 20f)
-                )
-            }
+            CircularProgressBar(
+                progress = (stepCount / 10000f) * 100, // Assuming 10,000 steps is the goal
+                modifier = Modifier.size(250.dp),
+                color = Color(0xFFD7BDE2),
+                strokeWidth = 20f
+            )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "$stepCount steps",
@@ -185,15 +236,15 @@ fun HomeScreenContent(
                     color = Color.Black
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "$caloriesBurned kcal",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Gray
-                )
+//                Text(
+//                    text = "$caloriesBurned kcal",
+//                    fontSize = 18.sp,
+//                    fontWeight = FontWeight.Normal,
+//                    color = Color.Gray
+//                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "$distanceWalked km",
+                    text = String.format("%.2f km", distanceWalked),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.Gray
@@ -272,6 +323,31 @@ fun HomeScreenContent(
         }
     }
 }
+fun saveWalkData(stepCount: Int, calories: Float, distance: Float) {
+    val user = FirebaseAuth.getInstance().currentUser
+    val userId = user?.uid ?: return
+    val db = FirebaseFirestore.getInstance()
+
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val currentDate = dateFormat.format(Date()) // Get current date as String
+
+    val walkData = hashMapOf(
+        "userId" to userId,
+        "steps" to stepCount,
+        "calories" to calories,
+        "distance" to distance,
+        "date" to currentDate // Save the formatted date string
+    )
+
+    db.collection("walks")
+        .add(walkData)
+        .addOnSuccessListener {
+            Log.d("HomeScreenContent", "Walk data successfully saved!")
+        }
+        .addOnFailureListener { e ->
+            Log.e("HomeScreenContent", "Error saving walk data", e)
+        }
+}
 fun calculateAge(birthday: String): Int {
     val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val birthDate = dateFormat.parse(birthday)
@@ -288,4 +364,59 @@ fun calculateAge(birthday: String): Int {
     }
 
     return age
+}
+@Composable
+fun CircularProgressBar(
+    progress: Float,
+    modifier: Modifier = Modifier,
+    color: Color = Color(0xFFD7BDE2),
+    strokeWidth: Float = 20f
+) {
+    Canvas(modifier = modifier) {
+        val sweepAngle = (progress / 100f) * 360f
+        drawCircle(
+            color = color.copy(alpha = 0.3f),
+            style = Stroke(strokeWidth)
+        )
+        drawArc(
+            color = color,
+            startAngle = -90f,
+            sweepAngle = sweepAngle,
+            useCenter = false,
+            style = Stroke(strokeWidth)
+        )
+    }
+}
+
+@Composable
+fun RequestPermission(
+    permission: String,
+    onPermissionGranted: () -> Unit
+) {
+    val context = LocalContext.current
+
+    // Only check for permission on Android 10 (API 29) and higher
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+                if (isGranted) {
+                    onPermissionGranted()
+                } else {
+                    Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+
+        LaunchedEffect(Unit) {
+            if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionLauncher.launch(permission)
+            } else {
+                onPermissionGranted() // Permission already granted
+            }
+        }
+    } else {
+        // If Android version is lower than Q, no need to request permission
+        onPermissionGranted()
+    }
 }

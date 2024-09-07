@@ -1,4 +1,5 @@
 package com.example.trackmyfit.recorded.walk
+import android.app.Application
 import android.content.Context
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -14,117 +15,62 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.StateFlow
 
-//class StepCounterViewModel : ViewModel() {
-//    private val _stepCount = MutableStateFlow(0)
-//    val stepCount = _stepCount.asStateFlow()
-//
-//
-//    private var stepsAtMidnight: Int = 0
-//    private lateinit var sensorManager: SensorManager
-//    private lateinit var stepCounterSensor: Sensor
-//
-//
-//    private val sensorEventListener = object : SensorEventListener {
-//        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-//
-//        override fun onSensorChanged(event: SensorEvent?) {
-//            event?.let {
-//                val totalSteps = event.values[0].toInt()
-//                // Ažuriraj broj koraka u realnom vremenu
-//                _stepCount.value = totalSteps - stepsAtMidnight
-//            }
-//        }
-//    }
-//
-//    fun updateStepCount(totalSteps: Int) {
-//        _stepCount.value = totalSteps
-//    }
-//    fun startStepCounting(context: Context) {
-//        sensorManager = ContextCompat.getSystemService(context, SensorManager::class.java)!!
-//
-//        // Inicijalizacija senzora za brojanje koraka
-//        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)!!
-//
-//        stepCounterSensor?.let { sensor ->
-//            sensorManager.registerListener(sensorEventListener, sensor, SensorManager.SENSOR_DELAY_UI)
-//        } ?: run {
-//            Log.e("StepCounter", "Step Counter Sensor is not available on this device.")
-//        }
-//
-//        // Učitavanje koraka u ponoć iz SharedPreferences
-//        val sharedPreferences = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE)
-//        stepsAtMidnight = sharedPreferences.getInt("stepsAtMidnight", 0)
-//    }
-//
-//    fun calculateCaloriesBurned(steps: Int, weight: Float, height: Float, age: Int, gender: String): Int {
-//        // Formula for calories burned calculation
-//        return (steps * 0.04 * weight).toInt() // Ovo je primer jednostavne formule
-//    }
-//
-//    fun calculateDistanceWalked(steps: Int, height: Float, gender: String): Float {
-//        // Formula for calculating distance based on steps and height
-//        val strideLength = when (gender.lowercase()) {
-//            "male" -> height * 0.415f
-//            "female" -> height * 0.413f
-//            else -> height * 0.414f
-//        }
-//
-//        // Calculate distance in meters, then convert to kilometers
-//        val distanceInMeters = steps * strideLength
-//        return distanceInMeters / 1000f
-//    }
-//    fun resetStepsAtMidnight(context: Context) {
-//        // Resetuj korake
-//        val sharedPreferences = context.getSharedPreferences("StepCounterPrefs", Context.MODE_PRIVATE)
-//        val stepsAtMidnight = sharedPreferences.getInt("stepsAtMidnight", 0)
-//        _stepCount.value = 0
-//
-//        // Sačuvaj resetovane korake
-//        sharedPreferences.edit().putInt("stepsAtMidnight", _stepCount.value).apply()
-//    }
-//
-//    fun scheduleMidnightReset(context: Context) {
-//        val calendar = Calendar.getInstance().apply {
-//            set(Calendar.HOUR_OF_DAY, 0)
-//            set(Calendar.MINUTE, 0)
-//            set(Calendar.SECOND, 0)
-//        }
-//
-//        val initialDelay = calendar.timeInMillis - System.currentTimeMillis()
-//        val workRequest = PeriodicWorkRequestBuilder<ResetStepsWorker>(1, TimeUnit.DAYS)
-//            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
-//            .build()
-//
-//        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-//            "reset_steps_at_midnight",
-//            ExistingPeriodicWorkPolicy.REPLACE,
-//            workRequest
-//        )
-//    }
-//
-//}
-class StepCounterViewModel : ViewModel() {
+
+class StepCounterViewModel(application: Application) : AndroidViewModel(application), SensorEventListener{
     private val _stepCount = MutableStateFlow(0)
     val stepCount: StateFlow<Int> = _stepCount
 
-    // Funkcija za ažuriranje broja koraka
-    fun updateStepCount(totalSteps: Int) {
-        _stepCount.value = totalSteps
+
+    private var sensorManager: SensorManager? = null
+    private var stepSensor: Sensor? = null
+    private var isStepSensorAvailable = false
+
+    init {
+        sensorManager = application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        stepSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+
+        if (stepSensor != null) {
+            isStepSensorAvailable = true
+        } else {
+            Log.e("StepCounterViewModel", "Step sensor not available!")
+        }
     }
 
-    // Funkcija za proračun kalorija na osnovu koraka
-//    fun calculateCaloriesBurned(steps: Int, weight: Float): Int {
-//        return (steps * 0.04 * weight).toInt()
-//    }
+    // Register the sensor listener
+    fun registerSensor() {
+        stepSensor?.also { sensor ->
+            sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+    }
 
-    // Funkcija za proračun distance na osnovu koraka i visine
-//    fun calculateDistanceWalked(steps: Int, height: Float): Float {
-//        val strideLength = height * 0.415f // Proračun dužine koraka u metrima
-//        val distanceInMeters = steps * strideLength
-//        return distanceInMeters / 1000f // Pređeno u kilometrima
-//    }
+    // Unregister the sensor listener
+    fun unregisterSensor() {
+        sensorManager?.unregisterListener(this)
+    }
+
+    // Reset step count
+    fun resetStepCount() {
+        _stepCount.value = 0
+    }
+
+    // Listen to sensor changes
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.let {
+            if (event.sensor.type == Sensor.TYPE_STEP_DETECTOR) {
+                // Increment step count manually on each step detection
+                _stepCount.value += 1
+                Log.d("StepCounterViewModel", "Step detected! Total: ${_stepCount.value}")
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // No-op
+    }
+
     fun calculateDistanceWalked(steps: Int, height: Float, gender: String): Float {
         // Estimate stride length based on height and gender
         val strideLength = when (gender.lowercase()) {

@@ -198,7 +198,7 @@ fun UserProfileScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     when (selectedTabIndex) {
-                        0 -> WalkingTabContent(user)
+                        0 -> WalkingTabContent()
                         1 -> SleepingTabContent()
                         2 -> ActivitiesTabContent(user)
                     }
@@ -235,9 +235,11 @@ fun UserProfileScreen(navController: NavController) {
     }
 }
 @Composable
-fun WalkingTabContent(user: UserData) {
+fun WalkingTabContent() {
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-    var walksData by remember { mutableStateOf<List<WalkData>>(emptyList()) }
+    var walksData by remember { mutableStateOf<Map<String, Int>>(emptyMap()) } // Map of date to total steps
+
+
 
     // Fetch data from Firestore
     LaunchedEffect(userId) {
@@ -248,36 +250,37 @@ fun WalkingTabContent(user: UserData) {
             .get()
             .await()
 
-        val fetchedWalks = walksSnapshot.documents.map { document ->
-            val steps = document.getLong("steps")?.toInt() ?: 0
-            val date = document.getDate("date") ?: Date()
-            WalkData(steps, date)
-        }
-        walksData = fetchedWalks
+        // Group walk data by date and sum the steps
+        val groupedWalks = walksSnapshot.documents
+            .groupBy { document ->
+                document.getString("date") ?: "" // Group by date
+            }.mapValues { entry ->
+                entry.value.sumBy { document ->
+                    document.getLong("steps")?.toInt() ?: 0 // Sum the steps
+                }
+            }.filterKeys { it.isNotEmpty() } // Remove empty dates if any
+
+        walksData = groupedWalks.toSortedMap(compareByDescending { it }) // Sort by descending date
     }
 
     // Display the graph with scrollable bars
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        if (walksData.isNotEmpty()) {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                items(walksData.size) { index ->
-                    val walk = walksData[index]
-                    WalkBar(walk.steps, walk.date)
-                }
-            }
-        } else {
-            Text("No walking data available")
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        items(walksData.toList()) { (dateString, totalSteps) ->
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val date = dateFormat.parse(dateString) ?: Date()
+            WalkBar(totalSteps = totalSteps, date = date)
         }
     }
 }
+
 @Composable
-fun WalkBar(steps: Int, date: Date) {
-    val maxSteps = 40000 // Define the max height for the bar based on a maximum step count
-    val barHeightRatio = steps.toFloat() / maxSteps
+fun WalkBar(totalSteps: Int, date: Date) {
+    val maxSteps = 10000f // Define the max height for the bar based on a maximum step count
+    val barHeightRatio = totalSteps / maxSteps
 
     // Format the date to day/month
     val dateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
@@ -287,15 +290,20 @@ fun WalkBar(steps: Int, date: Date) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
+        // The Canvas will draw the bar with rounded corners
         Canvas(
             modifier = Modifier
-                .height(150.dp)
-                .width(30.dp)
+                .height(150.dp) // Total height for the bars
+                .width(15.dp)   // Width for the bars
         ) {
-            // Draw the bar based on the step count
-            drawRect(
-                color = Color(0xFFD7BDE2),
-                size = size.copy(height = size.height * barHeightRatio)
+            val barHeight = size.height * barHeightRatio
+            val cornerRadius = 8.dp.toPx() // Set the corner radius for the bars
+
+            drawRoundRect(
+                color = Color(0xFFD7BDE2), // Color similar to the sleep bars
+                topLeft = Offset(0f, size.height - barHeight), // Start from the bottom
+                size = Size(size.width, barHeight), // Dynamic height
+                cornerRadius = CornerRadius(cornerRadius, cornerRadius) // Rounded corners
             )
         }
 
@@ -304,7 +312,6 @@ fun WalkBar(steps: Int, date: Date) {
         // Display the formatted date under the bar
         Text(text = formattedDate, fontSize = 12.sp)
     }
-
 }
 
 data class WalkData(
@@ -390,6 +397,7 @@ fun SleepBar(totalMinutes: Int, date: Date) {
         Text(text = formattedDate, fontSize = 12.sp)
     }
 }
+data class SleepSession(val length: String, val date: Date)
 
 // Function to extract total minutes from a string like "8h 30min"
 fun extractMinutesFromLength(length: String): Int {
@@ -406,13 +414,17 @@ fun extractMinutesFromLength(length: String): Int {
 }
 
 
-data class SleepSession(val length: String, val date: Date)
+
 
 @Composable
 fun ActivitiesTabContent(user: UserData) {
     // Ovdje možete prikazati podatke ili funkcionalnosti vezane za druge aktivnosti korisnika
     Text("Activities content goes here")
 }
+
+
+
+
 data class UserData(
     val firstName: String = "",
     val lastName: String = "",
