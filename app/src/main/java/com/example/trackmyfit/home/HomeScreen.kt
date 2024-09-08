@@ -43,6 +43,7 @@ import java.util.Date
 fun MainScreen(navController: NavHostController) {
     val items = listOf(
         BottomNavItem.Search,
+        BottomNavItem.Leaderboard,
         BottomNavItem.Add,
         BottomNavItem.Map,
         BottomNavItem.Profile

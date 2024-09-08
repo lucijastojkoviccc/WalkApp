@@ -16,6 +16,11 @@ sealed class BottomNavItem(
         icon = Icons.Default.Search,
         title = "Search"
     )
+    object Leaderboard : BottomNavItem(
+        route = "lead",
+        icon = Icons.Default.List,
+        title = "LB"
+    )
 
     object Map : BottomNavItem(
         route = "map",

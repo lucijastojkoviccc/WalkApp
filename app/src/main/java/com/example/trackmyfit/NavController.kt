@@ -1,5 +1,6 @@
 package com.example.trackmyfit
 
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -19,10 +20,15 @@ import com.example.trackmyfit.home.map.MapScreen
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.example.trackmyfit.home.OtherUserProfileScreen
+import com.example.trackmyfit.home.leaderboard.LB
+import com.example.trackmyfit.home.leaderboard.LeaderboardScreen
+import com.example.trackmyfit.home.leaderboard.LeaderboardViewModel
 import com.example.trackmyfit.recorded.activity.ShowActivityScreen
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
@@ -41,6 +47,9 @@ fun AppNavHost(
         }
         composable(BottomNavItem.Search.route) {
             SearchScreen(navController = navController)
+        }
+        composable(BottomNavItem.Leaderboard.route) {
+            LB(navController = navController)
         }
         composable(BottomNavItem.Add.route) {
             AddActivityScreen(navController = navController)

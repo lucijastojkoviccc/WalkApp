@@ -43,6 +43,7 @@ fun SearchScreen(
 ) {
     val items = listOf(
         BottomNavItem.Search,
+        BottomNavItem.Leaderboard,
         BottomNavItem.Add,
         BottomNavItem.Map,
         BottomNavItem.Profile

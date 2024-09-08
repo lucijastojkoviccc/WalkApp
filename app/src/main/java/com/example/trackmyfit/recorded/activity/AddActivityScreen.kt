@@ -46,6 +46,7 @@ import java.util.UUID
 fun AddActivityScreen(navController: NavHostController) {
     val items = listOf(
         BottomNavItem.Search,
+        BottomNavItem.Leaderboard,
         BottomNavItem.Add,
         BottomNavItem.Map,
         BottomNavItem.Profile

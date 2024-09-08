@@ -84,6 +84,7 @@ fun UserProfileScreen(navController: NavController) {
     }
     val items = listOf(
         BottomNavItem.Search,
+        BottomNavItem.Leaderboard,
         BottomNavItem.Add,
         BottomNavItem.Map,
         BottomNavItem.Profile

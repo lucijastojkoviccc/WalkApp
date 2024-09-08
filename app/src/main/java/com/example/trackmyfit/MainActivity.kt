@@ -15,6 +15,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.content.pm.PackageManager
+import androidx.annotation.RequiresApi
 import com.google.firebase.FirebaseApp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
             }
 
 
+        @RequiresApi(Build.VERSION_CODES.O)
         @Composable
         fun CheckUserLoggedIn(navController: NavHostController) {
             val auth = remember { FirebaseAuth.getInstance() }
