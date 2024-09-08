@@ -25,24 +25,52 @@ import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import kotlinx.coroutines.launch
 import android.util.Log
+import androidx.compose.foundation.lazy.items
+
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import com.example.trackmyfit.R
+import com.example.trackmyfit.recorded.activity.Activity
 
 @Composable
 fun OtherUserProfileScreen(navController: NavController, userId: String) {
     var userData by remember { mutableStateOf<UserData?>(null) }
+    var activities by remember { mutableStateOf<List<Activity>>(emptyList()) }
+    var activityIds by remember { mutableStateOf<List<String>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current // Kontekst za pokretanje Intent-a
 
-    // Fetch user data
+    // Fetch user data and activities
     LaunchedEffect(userId) {
         val db = FirebaseFirestore.getInstance()
+
+        // Fetch user data
         val userDocument = db.collection("users").document(userId).get().await()
         userData = userDocument.toObject(UserData::class.java)
+
+        Log.d("Activitiessss", userId)
+        // Fetch activities for the user, sorted by date (assumed field name: timestamp)
+        val activitiesSnapshot = db.collection("activities")
+            .whereEqualTo("userId", userId)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .get().await()
+
+        //activities = activitiesSnapshot.toObjects(Activity::class.java)
+
+        // Kreiraj par (Activity, id) kako bi mogao da koristiš ID kad zatreba
+        val activityList = activitiesSnapshot.documents.map { document ->
+            document.toObject(Activity::class.java) to document.id
+        }.filter { it.first != null } // Filtriraj null vrednosti
+
+        activities = activityList.map { it.first!! }  // Preuzmi listu aktivnosti bez ID-jeva
+        activityIds = activityList.map { it.second } // Lista ID-ova za aktivnosti
+
         isLoading = false
     }
 
@@ -100,8 +128,14 @@ fun OtherUserProfileScreen(navController: NavController, userId: String) {
                             // Kreiraj Intent za slanje email-a
                             val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                                 data = Uri.parse("mailto:") // Samo email aplikacije će se otvarati
-                                putExtra(Intent.EXTRA_EMAIL, arrayOf(user.email)) // Postavi email adresu
-                                putExtra(Intent.EXTRA_SUBJECT, "Hi I noticed you on Track my fit") // Opcionalno: postavi naslov
+                                putExtra(
+                                    Intent.EXTRA_EMAIL,
+                                    arrayOf(user.email)
+                                ) // Postavi email adresu
+                                putExtra(
+                                    Intent.EXTRA_SUBJECT,
+                                    "Hi I noticed you on Track my fit"
+                                ) // Opcionalno: postavi naslov
                             }
                             context.startActivity(emailIntent) // Pokreni Intent
                         }) {
@@ -145,32 +179,65 @@ fun OtherUserProfileScreen(navController: NavController, userId: String) {
                             .fillMaxSize()
                             .padding(horizontal = 16.dp)
                     ) {
-                        items(10) { index -> // Replace 10 with actual activity data later
-                            ActivityItem(activityName = "Activity #$index")
+                        itemsIndexed(activities) { index, activity -> // Koristi itemsIndexed da možeš dobiti index
+                            val activityId = activityIds[index] // Pristupi ID-ju koristeći index
+
+                            ActivityItem(
+                                navController = navController,
+                                onClick = {
+                                    // Koristi ovaj lambda da uhvatiš ID
+                                    navController.navigate("show_activity_screen/$activityId")
+                                },
+                                activityType = activity.type
+                            )
                         }
+
                     }
                 }
             }
+        }
+
+    }
+}
+@Composable
+fun ActivityItem(navController: NavController, onClick: () -> Unit, activityType: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable(onClick = onClick), // Sada se onClick poziva kada se pritisne
+        elevation = 4.dp
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            val icon = when (activityType) {
+                "Running" -> R.drawable.ic_running
+                "Cycling" -> R.drawable.ic_cycling
+                "Rollerblading" -> R.drawable.ic_rollerblading
+                else -> R.drawable.ic_default
+            }
+
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = activityType,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = activityType,
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 16.sp
+            )
         }
     }
 }
 
 
-@Composable
-fun ActivityItem(activityName: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = 4.dp
-    ) {
-        Text(
-            text = activityName,
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            fontSize = 16.sp
-        )
-    }
-}
+
+
+
 

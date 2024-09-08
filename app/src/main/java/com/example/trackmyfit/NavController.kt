@@ -13,13 +13,16 @@ import com.example.trackmyfit.home.search.SearchScreen
 import com.example.trackmyfit.home.UserProfileScreen
 import com.example.trackmyfit.home.EditProfileScreen
 import com.example.trackmyfit.home.map.AddSpotScreen
-
+import com.example.trackmyfit.recorded.activity.AddActivityScreen
 import com.example.trackmyfit.home.map.ShowSpotScreen
 import com.example.trackmyfit.home.map.MapScreen
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import android.util.Log
 import com.example.trackmyfit.home.OtherUserProfileScreen
+import com.example.trackmyfit.recorded.activity.ShowActivityScreen
+
+
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
@@ -40,7 +43,7 @@ fun AppNavHost(
             SearchScreen(navController = navController)
         }
         composable(BottomNavItem.Add.route) {
-            //AddActivityScreen(navController)
+            AddActivityScreen(navController = navController)
         }
         composable("map"/*BottomNavItem.Map.route*/) {
             MapScreen(navController = navController)
@@ -64,6 +67,10 @@ fun AppNavHost(
             if (spotId != null) {
                 ShowSpotScreen(navController = navController, spotId = spotId)
             }
+        }
+        composable("show_activity_screen/{activityId}") { backStackEntry ->
+            val activityId = backStackEntry.arguments?.getString("activityId")
+            ShowActivityScreen(navController, activityId ?: "")
         }
 
         composable(

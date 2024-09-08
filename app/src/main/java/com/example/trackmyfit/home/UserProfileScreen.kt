@@ -35,6 +35,8 @@ import androidx.compose.foundation.lazy.items
 import java.text.SimpleDateFormat
 import java.util.*
 import android.util.Log
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import com.google.firebase.firestore.Query
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import com.example.trackmyfit.recorded.activity.Activity
 import java.util.*
 
 
@@ -200,7 +203,7 @@ fun UserProfileScreen(navController: NavController) {
                     when (selectedTabIndex) {
                         0 -> WalkingTabContent()
                         1 -> SleepingTabContent()
-                        2 -> ActivitiesTabContent(user)
+                        2 -> ActivitiesTabContent(navController)
                     }
                 }
             }
@@ -417,10 +420,64 @@ fun extractMinutesFromLength(length: String): Int {
 
 
 @Composable
-fun ActivitiesTabContent(user: UserData) {
-    // Ovdje možete prikazati podatke ili funkcionalnosti vezane za druge aktivnosti korisnika
-    Text("Activities content goes here")
+fun ActivitiesTabContent(navController: NavController) {
+    var activities by remember { mutableStateOf<List<Activity>>(emptyList()) }
+    var activityIds by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    val context = LocalContext.current
+
+    // Dohvati ID trenutno ulogovanog korisnika iz FirebaseAuth
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+    // Učitavanje podataka o aktivnostima korisnika iz Firestore-a
+    LaunchedEffect(currentUserId) {
+        val db = FirebaseFirestore.getInstance()
+
+        // Fetch activities for the current user
+        val activitiesSnapshot = db.collection("activities")
+            .whereEqualTo("userId", currentUserId)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .get().await()
+
+        // Kreiraj parove (Activity, id) kako bi mogao da koristiš ID kad zatreba
+        val activityList = activitiesSnapshot.documents.map { document ->
+            document.toObject(Activity::class.java) to document.id
+        }.filter { it.first != null } // Filtriraj null vrednosti
+
+        activities = activityList.map { it.first!! }  // Preuzmi listu aktivnosti bez ID-jeva
+        activityIds = activityList.map { it.second }  // Preuzmi listu ID-jeva
+
+        isLoading = false
+    }
+
+    // Prikaz loading indikatora dok podaci ne budu učitani
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    } else {
+        // Prikaz liste aktivnosti
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+        ) {
+            itemsIndexed(activities) { index, activity ->
+                val activityId = activityIds[index] // Uzimanje ID-ja aktivnosti pomoću index-a
+
+                ActivityItem(
+                    navController = navController,
+                    onClick = {
+                        // Koristi onClick da navigiraš na ShowActivityScreen
+                        navController.navigate("show_activity_screen/$activityId")
+                    },
+                    activityType = activity.type
+                )
+            }
+        }
+    }
 }
+
 
 
 
