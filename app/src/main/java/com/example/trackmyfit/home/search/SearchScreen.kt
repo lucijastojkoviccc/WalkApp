@@ -111,7 +111,9 @@ fun SearchScreen(
                     .padding(vertical = 8.dp)
             )
 
-            // Check if searchResults is not empty before rendering LazyColumn
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            val currentUserId = currentUser?.uid
+
             if (searchResults.isNotEmpty()) {
                 // Lazy list of search results
                 LazyColumn(
@@ -120,7 +122,13 @@ fun SearchScreen(
                     items(searchResults) { user ->
                         UserListItem(user = user, onClick = {
                             coroutineScope.launch {
-                                navController.navigate("otherUserProfile/${user.id}")
+                                if (user.id == currentUserId) {
+                                    // Ako je kliknuto na sopstveni profil, idi na Profile screen
+                                    navController.navigate(BottomNavItem.Profile.route)
+                                } else {
+                                    // Ako je kliknuto na drugi profil, idi na otherUserProfile
+                                    navController.navigate("otherUserProfile/${user.id}")
+                                }
                             }
                         })
                     }

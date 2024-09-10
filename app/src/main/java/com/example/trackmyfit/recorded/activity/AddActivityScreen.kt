@@ -64,10 +64,10 @@ fun AddActivityScreen(navController: NavHostController) {
             title = { Text(text = "Type of Activity") },
             text = {
                 Column {
-                    Text(
-                        text = "Select type of an Activity",
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+//                    Text(
+//                        text = "Select type of an Activity",
+//                        modifier = Modifier.padding(bottom = 16.dp)
+//                    )
                     RadioButtonGroup(selectedActivity.value) { activity ->
                         selectedActivity.value = activity
                     }
@@ -201,7 +201,7 @@ fun AddActivityContent(activityType:String, viewModel: StopwatchViewModel = view
                         // Pokušaj da se zoom postavi odmah ako je trenutna lokacija već dostupna
                         currentLocation?.let {
                             val currentLatLng = LatLng(it.latitude, it.longitude)
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f)) // Postavi početni zoom
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13f)) // Postavi početni zoom
                         }
 
                         // Ako lokacija nije dostupna odmah, postavi zoom kasnije samo jednom kada dobijemo lokaciju
@@ -221,7 +221,7 @@ fun AddActivityContent(activityType:String, viewModel: StopwatchViewModel = view
 
                                     if (!hasZoomedToLocation) {
                                         // Postavi početni zoom samo prvi put
-                                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
+                                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13f))
                                         hasZoomedToLocation = true
                                     } else {
                                         // Premesti kameru bez menjanja zoom-a za kasnije lokacije
@@ -260,13 +260,8 @@ fun AddActivityContent(activityType:String, viewModel: StopwatchViewModel = view
             modifier = Modifier.padding(top = 16.dp)
         )
 
-        // Start/Stop/Pause/Cancel/Finish buttons
         if (viewModel.isRunning) {
-//            Button(onClick = { viewModel.stopStopwatch() }, colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6200EA))) {
-//                Text(text = "Stop", color = Color.White)
-//            }
-
-            // Show Pause, Cancel, Finish after stopping
+            // Prikaz dugmadi Pause, Cancel, Finish nakon startovanja
             Row(modifier = Modifier.padding(top = 16.dp)) {
                 Button(onClick = {
                     viewModel.cancelStopwatch()
@@ -288,7 +283,7 @@ fun AddActivityContent(activityType:String, viewModel: StopwatchViewModel = view
                         viewModel.saveActivityToDatabase(activityType) { activityId ->
                             googleMap?.snapshot { bitmap ->
                                 saveSnapshotToStorage(bitmap!!, activityId) { uri ->
-                                    //viewModel.updateActivityWithImage(activityId, uri)
+                                    // Nakon uspešnog čuvanja u bazi, ne prikazuje se dugme Start
                                 }
                             }
                         }
@@ -297,7 +292,8 @@ fun AddActivityContent(activityType:String, viewModel: StopwatchViewModel = view
                     Text(text = "Finish")
                 }
             }
-        }else {
+        } else if (!showSummary) {
+            // Dugme Start je prikazano samo ako aktivnost nije završena i rezime nije prikazan
             Button(onClick = { viewModel.startStopwatch(fusedLocationClient) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6200EA))) {
                 Text(text = "Start", color = Color.White)
             }

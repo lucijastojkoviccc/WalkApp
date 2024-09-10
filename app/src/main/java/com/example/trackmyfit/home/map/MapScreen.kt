@@ -325,8 +325,48 @@ fun MapScreen(navController: NavHostController) {
                 },
                 dismissButton = {
                     Button(
-                        onClick = { isSearchVisible = false }
-                    ) {
+                        onClick = {
+                            isSearchVisible = false
+
+                            // Poništi sve filtere i prikaži sve workout spotove
+                            filteredWorkoutSpots = allWorkoutSpots
+
+                            // Očisti sve markere sa mape i prikaži sve workout spotove
+                            googleMap?.clear()
+
+                            // Prikaz trenutne lokacije korisnika
+                            currentLocation?.let { location ->
+                                val userLatLng = LatLng(location.latitude, location.longitude)
+                                googleMap?.addMarker(
+                                    MarkerOptions()
+                                        .position(userLatLng)
+                                        .title("Your Location")
+                                )
+                            }
+
+                            // Prikaz svih workout spotova
+                            allWorkoutSpots.forEach { spot ->
+                                val marker = googleMap?.addMarker(
+                                    MarkerOptions()
+                                        .position(LatLng(spot.latitude, spot.longitude))
+                                        .title(spot.name)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)) // Ljubičasti pin
+                                )
+                                marker?.tag = spot.id  // Dodeljivanje ID kao tag markera
+                            }
+                            selectedItems.clear()
+
+                            // Postavljanje klik listenera za markere
+                            googleMap?.setOnMarkerClickListener { marker ->
+                                val spotId = marker.tag as? String
+                                if (spotId != null) {
+                                    navController.navigate("show_spot/$spotId") // Navigacija na ShowSpotScreen sa prosleđenim id-em
+                                }
+                                marker.hideInfoWindow() // Ručno zatvori InfoWindow nakon klika
+                                true     // Vrati true da zadrži standardno ponašanje markera
+                            }
+                        }
+                    )  {
                         Text("Cancel")
                     }
                 },

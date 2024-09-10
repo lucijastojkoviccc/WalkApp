@@ -24,8 +24,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 
+import com.example.trackmyfit.R // Ova linija se odnosi na vaš paket, pazite da importujete ispravan R
+import androidx.compose.ui.text.font.FontWeight
 
+import androidx.compose.foundation.background
 
 @Composable
 fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewModel()) {
@@ -33,97 +39,135 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
     var password by remember { mutableStateOf("") }
     val loginState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text(text = "Login", style = MaterialTheme.typography.h4)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
+        // Postavite sliku kao pozadinu
+        Image(
+            painter = painterResource(id = R.drawable.login), // Zamenite "login" sa imenom vaše slike
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds // Postavlja sliku da prekriva ceo ekran
         )
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation()
+        // "Login" tekst na vrhu
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(50.dp)) // Razmak od vrha
 
-        )
-        //visualTransformation = PasswordVisualTransformation()
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = {
-            viewModel.login(email, password)
-        }) {
-            Text(text = "Log In")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Forgot your password?",
-            color = MaterialTheme.colors.primary,
-            modifier = Modifier.clickable {
-                // Poziva funkciju za resetovanje šifre
-
-                sendPasswordResetEmail(context, email)
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Navigate to Register Screen
-        Row {
-            // "Don't have an account?" Text
             Text(
-                text = "Don't have an account?",
-                color = Color.Black, // Use your preferred color
-                modifier = Modifier.padding(end = 4.dp) // Small space between the texts
+                text = "Login",
+                color = Color.White,
+                style = MaterialTheme.typography.h4,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
-            // "Sign in" Text with underline and clickable
-            Text(
-                text = "Sign in",
-                color = Color.Blue,
+            Spacer(modifier = Modifier.height(40.dp)) // Razmak ispod naslova
+
+            // Email i Password polja
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
                 modifier = Modifier
-                    .clickable { navController.navigate("register") }, // Only "Sign in" is clickable
-                textDecoration = TextDecoration.Underline // Underline only "Sign in"
+                    .fillMaxWidth()
+                    .background(Color.White),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
             )
-        }
 
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
+            )
 
-        if (loginState is LoginState.Error) {
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Log In dugme
+            Button(
+                onClick = { viewModel.login(email, password) }//,
+                //modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Log In")
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Forgot Password tekst
             Text(
-                //text = (loginState as LoginState.Error).error,
-                text=("Try again!"),
-                color = Color.Red
+                text = "Forgot your password?",
+                color = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .clickable {
+                        sendPasswordResetEmail(context, email)
+                    }
+                    .align(Alignment.CenterHorizontally)
             )
-        }
-    }
 
-    // Handle login success
-    if (loginState is LoginState.Success) {
-        LaunchedEffect(Unit) {
-            navController.navigate("home") {
-                popUpTo("login") { inclusive = true }
+            Spacer(modifier = Modifier.height(200.dp)) // Popuni prostor između elemenata
+
+            // "Don't have an account?" deo pri dnu ekrana
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 16.dp)
+            ) {
+                Text(
+                    text = "Don't have an account?",
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Register",
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        navController.navigate("register")
+                    },
+                    textDecoration = TextDecoration.Underline
+                )
+            }
+
+            if (loginState is LoginState.Error) {
+                Text(
+                    text = "Try again!",
+                    color = Color.Red
+                )
+            }
+        }
+
+        if (loginState is LoginState.Success) {
+            LaunchedEffect(Unit) {
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
             }
         }
     }
 }
+
 fun sendPasswordResetEmail(context: Context, email: String) {
     if (email.isNotEmpty()) {
         FirebaseAuth.getInstance().sendPasswordResetEmail(email)

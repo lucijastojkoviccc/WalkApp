@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.example.trackmyfit.BottomNavItem
 import com.example.trackmyfit.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -221,14 +222,22 @@ fun CommentItem(
         }
     }
 
-    // Koristimo Modifier.clickable da omogućimo klikanje na CommentItem
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val currentUserId = currentUser?.uid
+
+// Koristimo Modifier.clickable da omogućimo klikanje na CommentItem
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                // Navigacija ka profilu korisnika koji je ostavio komentar
-                navController.navigate("otherUserProfile/${comment.userId}")
+                if (comment.userId == currentUserId) {
+                    // Ako je komentar trenutno ulogovanog korisnika, idi na njegov profil
+                    navController.navigate(BottomNavItem.Profile.route)
+                } else {
+                    // Ako je komentar od drugog korisnika, idi na otherUserProfile
+                    navController.navigate("otherUserProfile/${comment.userId}")
+                }
             }
             .padding(vertical = 8.dp)
     ) {

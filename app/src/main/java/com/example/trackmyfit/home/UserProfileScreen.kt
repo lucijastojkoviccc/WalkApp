@@ -163,23 +163,23 @@ fun UserProfileScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = "${user.gender}",
-                        fontSize = 14.sp
-                    )
+//                    Text(
+//                        text = "${user.gender}",
+//                        fontSize = 14.sp
+//                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Visina i težina
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "Visina: ${user.height} cm", fontSize = 16.sp)
-                        Text(text = "Težina: ${user.weight} kg", fontSize = 16.sp)
-                    }
+//                    // Visina i težina
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(horizontal = 16.dp),
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+//                        Text(text = "Visina: ${user.height} cm", fontSize = 16.sp)
+//                        Text(text = "Težina: ${user.weight} kg", fontSize = 16.sp)
+//                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -367,7 +367,7 @@ fun SleepingTabContent() {
 
 @Composable
 fun SleepBar(totalMinutes: Int, date: Date) {
-    val maxMinutes = 24 * 60f // Maximum height for the bar based on 24 hours in minutes
+    val maxMinutes = 12 * 60f // Maximum height for the bar based on 24 hours in minutes
     val barHeightRatio = totalMinutes / maxMinutes
 
     // Format the date to day/month

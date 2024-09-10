@@ -35,7 +35,7 @@ class StepCounterViewModel(application: Application) : AndroidViewModel(applicat
         if (stepSensor != null) {
             isStepSensorAvailable = true
         } else {
-            Log.e("StepCounterViewModel", "Step sensor not available!")
+            Log.e("Steppp", "Step sensor not available!")
         }
     }
 
@@ -62,7 +62,7 @@ class StepCounterViewModel(application: Application) : AndroidViewModel(applicat
             if (event.sensor.type == Sensor.TYPE_STEP_DETECTOR) {
                 // Increment step count manually on each step detection
                 _stepCount.value += 1
-                Log.d("StepCounterViewModel", "Step detected! Total: ${_stepCount.value}")
+                Log.d("Steppp", "Step detected! Total: ${_stepCount.value}")
             }
         }
     }

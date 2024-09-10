@@ -18,7 +18,11 @@ import androidx.navigation.NavController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun ShowActivityScreen(navController: NavController, activityId: String) {
@@ -57,28 +61,49 @@ fun ShowActivityScreen(navController: NavController, activityId: String) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Prikaz slike sa Firebase Storage-a
+                // Prikaz slike sa okvirom i zaobljenim uglovima
                 imageUrl?.let {
                     Image(
                         painter = rememberImagePainter(it),
                         contentDescription = "Activity Image",
                         modifier = Modifier
                             .height(250.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .border(5.dp, Color(0xFFD7BDE2))  // Okvir za sliku
+                            .clip(RoundedCornerShape(8.dp)),  // Zaobljeni uglovi slike
                         contentScale = ContentScale.Crop
                     )
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // Prikaz podataka o aktivnosti
-                Text(text = "Time: ${formatTime(activity.timeInMillis)}", fontWeight = FontWeight.Medium, fontSize = 20.sp)
+                // Prikaz podataka o aktivnosti sa okvirima i zaobljenim uglovima
+                TextBoxWithBorder(text = "Time: ${formatTime(activity.timeInMillis)}")
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Distance: ${activity.distanceInKM} km", fontWeight = FontWeight.Medium, fontSize = 20.sp)
+                TextBoxWithBorder(text = "Distance: ${activity.distanceInKM} km")
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Calories: ${activity.caloriesBurned}", fontWeight = FontWeight.Medium, fontSize = 20.sp)
+                TextBoxWithBorder(text = "Calories: ${activity.caloriesBurned}")
             }
         }
+    }
+}
+
+@Composable
+fun TextBoxWithBorder(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))  // Zaobljeni uglovi za polja
+            .background(Color(0xFFD7BDE2))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.Medium,
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

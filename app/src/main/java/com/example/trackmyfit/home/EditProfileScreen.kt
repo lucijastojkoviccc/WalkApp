@@ -215,7 +215,7 @@ fun EditProfileScreen(navController: NavController) {
                         // Upload the new profile picture if available
                         newProfilePictureUri?.let {
                             val fileName = "${userData.email}_profpic.png"
-                            val profilePicRef = storageRef.child("profile_pictures/$userId/$fileName")
+                            val profilePicRef = storageRef.child("profile_pictures/$fileName")
                             profilePicRef.putFile(it).await()
                             val downloadUrl = profilePicRef.downloadUrl.await().toString()
                             userData = userData.copy(profilePictureUrl = downloadUrl)

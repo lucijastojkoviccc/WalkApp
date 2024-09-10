@@ -43,6 +43,7 @@ import com.example.trackmyfit.BottomNavItem
 import com.example.trackmyfit.home.Home
 import com.example.trackmyfit.home.HomeScreenContent
 import com.example.trackmyfit.home.search.User
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -193,11 +194,20 @@ fun LeaderboardItem(userId: String, distanceInKM: String, rank: Int, navControll
         Text("Loading...", modifier = Modifier.padding(16.dp))
     } else {
         Column {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            val currentUserId = currentUser?.uid
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        navController.navigate("otherUserProfile/$userId")
+                        if (userId == currentUserId) {
+                            // Ako je ID trenutnog korisnika, idi na njegov profil
+                            navController.navigate(BottomNavItem.Profile.route)
+                        } else {
+                            // Ako je ID drugog korisnika, idi na profil drugog korisnika
+                            navController.navigate("otherUserProfile/$userId")
+                        }
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically

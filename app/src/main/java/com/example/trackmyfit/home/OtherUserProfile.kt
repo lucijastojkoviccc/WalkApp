@@ -134,7 +134,7 @@ fun OtherUserProfileScreen(navController: NavController, userId: String) {
                                 ) // Postavi email adresu
                                 putExtra(
                                     Intent.EXTRA_SUBJECT,
-                                    "Hi I noticed you on Track my fit"
+                                    "Hi I noticed you on TrackMyFit"
                                 ) // Opcionalno: postavi naslov
                             }
                             context.startActivity(emailIntent) // Pokreni Intent

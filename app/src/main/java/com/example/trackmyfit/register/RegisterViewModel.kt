@@ -79,7 +79,7 @@ class RegisterViewModel : ViewModel() {
                                 }
                             }
                         } else {
-                            _state.value = _state.value.copy(error = "Registration failed")
+                            // Ukloni proveru za već registrovan email - nema reakcije na grešku
                         }
                     }
             } catch (e: Exception) {
@@ -87,6 +87,7 @@ class RegisterViewModel : ViewModel() {
             }
         }
     }
+
 
     private fun saveUserDataToFirestore(userId: String, profileImageUrl: String?) {
         // Obezbedi da se podaci za email i birthDate pravilno čuvaju
