@@ -18,8 +18,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.trackmyfit.BottomNavItem
-import com.example.trackmyfit.recorded.SleepViewModel
 import com.example.trackmyfit.recorded.walk.StepCounterViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -32,6 +30,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.core.content.ContextCompat
 import java.text.SimpleDateFormat
@@ -41,180 +40,70 @@ import java.util.Date
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    val items = listOf(
-        BottomNavItem.Search,
-        BottomNavItem.Leaderboard,
-        BottomNavItem.Add,
-        BottomNavItem.Map,
-        BottomNavItem.Profile
-    )
+
 
     val stepCounterViewModel: StepCounterViewModel = viewModel()
-    val sleepViewModel: SleepViewModel = viewModel()
-    Scaffold(
-        bottomBar = {
-            BottomNavigation {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
 
-                items.forEach { item ->
-                    BottomNavigationItem(
-                        icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
-                        label = { Text(text = item.title) },
-                        selected = currentRoute == item.route,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.startDestinationRoute ?: "home") {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-            }
-        }
+    Scaffold(
+
     ) { innerPadding ->
-        // Prikaz osnovnog sadržaja HomeScreen-a (može biti prazan, ili neki intro tekst)
         Home(modifier = Modifier.padding(innerPadding))
-        HomeScreenContent(
-            viewModel = stepCounterViewModel,
-            sleepViewModel = sleepViewModel)
+        HomeScreenContent(viewModel = stepCounterViewModel)
     }
 }
+
 @Composable
 fun Home(modifier: Modifier = Modifier) {
     Text(text = "")
 }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreenContent(
-    viewModel: StepCounterViewModel = viewModel(),
-    sleepViewModel: SleepViewModel = viewModel()
+    viewModel: StepCounterViewModel = viewModel()
 ) {
-    val context = LocalContext.current
+
     val scope = rememberCoroutineScope()
     val stepCount by viewModel.stepCount.collectAsState()
 
-    // State za čuvanje podataka o korisniku
-    var weight by remember { mutableStateOf(70f) }
-    var height by remember { mutableStateOf(170) }
-    var heightinm by remember { mutableStateOf(1.7f) }
-    var gender by remember { mutableStateOf("male") }
-    var birthday by remember { mutableStateOf("") }
-    var age by remember { mutableStateOf(0) }
 
-    // State za spavanje
-    var sleepStart by remember { mutableStateOf<Long?>(null) }
-    var sleepEnd by remember { mutableStateOf<Long?>(null) }
-    var sleepLength by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        val user = FirebaseAuth.getInstance().currentUser
-        val userId = user?.uid ?: return@LaunchedEffect
-        val db = FirebaseFirestore.getInstance()
-
-        db.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                weight = document.getDouble("weight")?.toFloat() ?: 70f
-                height = document.getDouble("height")?.toInt() ?: 170
-                gender = document.getString("gender") ?: "male"
-                birthday = document.getString("birthday") ?: ""
-
-                heightinm = height / 100f
-                if (birthday.isNotEmpty()) {
-                    age = calculateAge(birthday)
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("HomeScreenContent", "Error getting user data", exception)
-            }
-
-        // Fetch sleep data from Firestore
-        scope.launch {
-            try {
-                val sleepCollection = db.collection("sleep")
-                val querySnapshot = sleepCollection
-                    .whereEqualTo("userId", userId)
-                    .orderBy("start", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                    .limit(1)
-                    .get()
-                    .await()
-
-                if (!querySnapshot.isEmpty) {
-                    val sleepDocument = querySnapshot.documents[0]
-                    sleepStart = sleepDocument.getLong("start")
-                    sleepEnd = sleepDocument.getLong("end")
-                    sleepLength = sleepDocument.getString("length") ?: ""
-                }
-            } catch (e: Exception) {
-                Log.e("HomeScreenContent", "Error fetching sleep data", e)
-            }
-        }
-    }
-//    DisposableEffect(Unit) {
-//        onDispose {
-//            // Unregister sensor when composable leaves the composition
-//            viewModel.unregisterSensor()
-//        }
-//    }
     var permissionGranted by remember { mutableStateOf(false) }
 
-    // Only request permission on Android 10 (API 29) or higher
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
         RequestPermission(permission = android.Manifest.permission.ACTIVITY_RECOGNITION) {
             permissionGranted = true
         }
     } else {
-        // No need for permission on Android 8.0.0 and lower
         permissionGranted = true
     }
 
-    // Register/Unregister Sensor when Composable is active
     if (permissionGranted) {
         DisposableEffect(Unit) {
             viewModel.registerSensor()
-
-            onDispose {
-                viewModel.unregisterSensor()
-            }
+            onDispose { viewModel.unregisterSensor() }
         }
     }
-    val caloriesBurned = viewModel.calculateCaloriesBurned(stepCount, weight, heightinm, age, gender)
-    val distanceWalked = viewModel.calculateDistanceWalked(stepCount, heightinm, gender)
+    val distanceWalked = viewModel.calculateDistanceWalked(stepCount, 1.75f)
 
-    // Postavljanje sadržaja sa skrolovanjem
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // Naslov "Walking" iznad ljubičastog kruga
-        Text(
-            text = "Walking",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.padding(bottom = 8.dp, top=10.dp)
-        )
 
-        // Ljubicasti krug sa podacima unutar njega
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp)
-                .padding(top = 20.dp)
+                .padding(bottom = 24.dp, top = 20.dp)
                 .combinedClickable(
                     onClick = {},
                     onLongClick = {
-                        // Save walk data before resetting
-                        //saveWalkData(stepCount, caloriesBurned.toFloat(), distanceWalked)
                         scope.launch {
                             saveWalkData(
                                 stepCount = stepCount,
-                                calories = caloriesBurned.toFloat(),
+
                                 distance = distanceWalked
                             )
                         }
@@ -224,120 +113,56 @@ fun HomeScreenContent(
             contentAlignment = Alignment.Center
         ) {
             CircularProgressBar(
-                progress = (stepCount / 10000f) * 100, // Assuming 10,000 steps is the goal
-                modifier = Modifier.size(250.dp),
-                color = Color(0xFFD7BDE2),
+                progress = (stepCount / 10000f) * 100,
+                modifier = Modifier.size(250.dp).padding(top=40.dp),
+                color = Color(0xFF29CF1D),
                 strokeWidth = 20f
             )
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .align(Alignment.Center)
+            ) {
                 Text(
                     text = "$stepCount steps",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = Color(0xFF29CF1D)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-//                Text(
-//                    text = "$caloriesBurned kcal",
-//                    fontSize = 18.sp,
-//                    fontWeight = FontWeight.Normal,
-//                    color = Color.Gray
-//                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = String.format("%.2f km", distanceWalked),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Gray
+                    color = Color(0xFF29CF1D)
                 )
             }
         }
-
-        // Sekcija za spavanje
-        Text(
-            text = "Sleeping",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            contentAlignment = Alignment.Center
+                .padding( top = 170.dp)
         ) {
-            Canvas(modifier = Modifier.size(200.dp)) {
-                drawCircle(
-                    color = Color.Black,
-                    style = Stroke(width = 20f)
-                )
-            }
-            Text(
-                text = if (sleepLength.isNotEmpty()) sleepLength else "0h 0min",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFD7BDE2)
-            )
-        }
-
-        // Buttons for Good Night and Good Morning
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(
-                onClick = {
-                    sleepStart = System.currentTimeMillis()
-                    sleepEnd = null
-                    sleepLength = ""
-
-                    Toast.makeText(context, "Sleep tight!", Toast.LENGTH_SHORT).show()
-                },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)
-            ) {
-                Text(text = "Good night!", color = Color(0xFFD7BDE2))
-            }
-
-            Button(
-                onClick = {
-                    sleepEnd = System.currentTimeMillis()
-                    if (sleepStart != null && sleepEnd != null) {
-                        val sleepDuration = sleepEnd!! - sleepStart!!
-                        if (sleepDuration <= 0) {
-                            Log.e("SleepViewModel", "Error: Invalid sleep duration.")
-                            return@Button
-                        }
-                        val hours = TimeUnit.MILLISECONDS.toHours(sleepDuration)
-                        val minutes = TimeUnit.MILLISECONDS.toMinutes(sleepDuration) % 60
-                        sleepLength = "${hours}h ${minutes}min"
-
-                        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@Button
-                        sleepViewModel.saveSleepSession(sleepStart!!, sleepEnd!!, sleepLength, userId)
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD7BDE2))
-            ) {
-                Text(text = "Good Morning!", color = Color.Black)
-            }
+            WalkingTabContent()
         }
     }
 }
-fun saveWalkData(stepCount: Int, calories: Float, distance: Float) {
+
+fun saveWalkData(stepCount: Int, distance: Float) {
     val user = FirebaseAuth.getInstance().currentUser
     val userId = user?.uid ?: return
     val db = FirebaseFirestore.getInstance()
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    val currentDate = dateFormat.format(Date()) // Get current date as String
+    val currentDate = dateFormat.format(Date())
 
     val walkData = hashMapOf(
         "userId" to userId,
         "steps" to stepCount,
-        "calories" to calories,
         "distance" to distance,
-        "date" to currentDate // Save the formatted date string
+        "date" to currentDate
     )
 
     db.collection("walks")
@@ -349,23 +174,8 @@ fun saveWalkData(stepCount: Int, calories: Float, distance: Float) {
             Log.e("HomeScreenContent", "Error saving walk data", e)
         }
 }
-fun calculateAge(birthday: String): Int {
-    val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    val birthDate = dateFormat.parse(birthday)
-    val today = Calendar.getInstance()
 
-    val birthCalendar = Calendar.getInstance().apply {
-        time = birthDate
-    }
 
-    var age = today.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR)
-
-    if (today.get(Calendar.DAY_OF_YEAR) < birthCalendar.get(Calendar.DAY_OF_YEAR)) {
-        age--
-    }
-
-    return age
-}
 @Composable
 fun CircularProgressBar(
     progress: Float,
@@ -396,7 +206,6 @@ fun RequestPermission(
 ) {
     val context = LocalContext.current
 
-    // Only check for permission on Android 10 (API 29) and higher
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
         val permissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
@@ -413,11 +222,10 @@ fun RequestPermission(
             if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
                 permissionLauncher.launch(permission)
             } else {
-                onPermissionGranted() // Permission already granted
+                onPermissionGranted()
             }
         }
     } else {
-        // If Android version is lower than Q, no need to request permission
         onPermissionGranted()
     }
 }

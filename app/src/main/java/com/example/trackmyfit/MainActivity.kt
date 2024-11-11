@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 class MainActivity : ComponentActivity() {
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -51,11 +52,7 @@ class MainActivity : ComponentActivity() {
         @Composable
         fun CheckUserLoggedIn(navController: NavHostController) {
             val auth = remember { FirebaseAuth.getInstance() }
-
-            // Odredi početnu destinaciju na osnovu toga da li je korisnik prijavljen
             val startDestination = if (auth.currentUser != null) "home" else "login"
-
-            // Prikazivanje navigacionog hosta sa odgovarajućom početnom destinacijom
             AppNavHost(navController = navController, startDestination = startDestination)
         }
 }
