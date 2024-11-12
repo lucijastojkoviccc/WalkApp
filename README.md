@@ -13,20 +13,20 @@
 Klonirajte repozitorijum sa GitHub-a.
 Otvorite projekt u Android Studiju i pokrenite ga na fizičkom uređaju (zbog tačnosti senzora).
 
-###Dodeljivanje dozvola:
+### Dodeljivanje dozvola:
 Ako koristite **Step Counter** ili **Step Detector**, aplikacija će tražiti dozvolu za praćenje fizičke aktivnosti (ACTIVITY_RECOGNITION). Dodeljivanje dozvole je potrebno za rad senzora.
 
-###Praćenje aktivnosti:
+### Praćenje aktivnosti:
 Aplikacija će automatski početi sa brojanjem koraka čim je pokrenuta. Korisnik može pratiti svoj napredak na grafiku i resetovati brojač koraka dugim pritiskom na glavni ekran.
 
-##Korisnički interfejs aplikacije
+## Korisnički interfejs aplikacije
 
 Aplikacija koristi Jetpack Compose za korisnički interfejs, sa sledećim glavnim elementima:
 
 - Brojač koraka i udaljenosti - Glavni prikaz prikazuje trenutni broj koraka i pređenu distancu, koji se ažuriraju u realnom vremenu.
 - Grafikon dnevnih aktivnosti - Prikazuje pređene korake za svaki dan. Koristi Firebase za čuvanje i preuzimanje podataka, a LazyRow za horizontalno prikazivanje grafikona. Ovaj grafikon omogućava korisnicima da jednostavno prate svoj napredak tokom vremena.
 
-##Firebase integracija
+## Firebase integracija
 
 Aplikacija koristi Firebase Firestore za skladištenje podataka o korisničkim aktivnostima. Svaki put kada korisnik sačuva aktivnost dugim pritiskom na ekran, aplikacija kreira zapis u Firestore-u koji sadrži:
 *userId: ID korisnika (Firebase Authentication)
@@ -34,7 +34,7 @@ Aplikacija koristi Firebase Firestore za skladištenje podataka o korisničkim a
 *distance: Pređena razdaljina u kilometrima
 *date: Datum kada su koraci pređeni
 
-###Kod za čuvanje podataka izgleda ovako:
+### Kod za čuvanje podataka izgleda ovako:
 ```kotlin
 fun saveWalkData(stepCount: Int, distance: Float) {
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -58,7 +58,7 @@ fun saveWalkData(stepCount: Int, distance: Float) {
 }
 ```
 
-##Prava pristupa (Permissions)
+## Prava pristupa (Permissions)
 Aplikacija traži dozvolu za praćenje aktivnosti (ACTIVITY_RECOGNITION), koja je obavezna kako bi senzori koraka mogli da funkcionišu. Aplikacija automatski traži ovu dozvolu pri prvom pokretanju.
 
 ```kotlin
@@ -67,7 +67,7 @@ RequestPermission(permission = android.Manifest.permission.ACTIVITY_RECOGNITION)
 }
 ```
 
-#Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
+# Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
 
 Ova aplikacija koristi tri ključne komponente za rad sa senzorima Android uređaja:
 
@@ -75,7 +75,7 @@ SensorManager - za upravljanje senzorima.
 Step Counter - za praćenje ukupnog broja koraka od poslednjeg resetovanja.
 Step Detector - za otkrivanje pojedinačnih koraka u realnom vremenu.
 
-##SensorManager
+## SensorManager
 
 **SensorManager** je klasa u Android SDK koja omogućava pristup senzorima dostupnim na uređaju, kao što su akcelerometar, žiroskop, barometar i drugi. Koristi se za upravljanje i rad sa senzorima, uključujući Step Counter i Step Detector. Evo osnovnih koraka za rad sa SensorManager:
 
@@ -105,7 +105,7 @@ Kada senzor više nije potreban (npr. kada korisnik zatvori aplikaciju), preporu
 ```kotlin
 sensorManager.unregisterListener(stepListener)
 ```
-##Step Counter
+## Step Counter
 Step Counter je vrsta senzora koji broji ukupne korake od trenutka kada je uređaj uključen ili kada je aplikacija resetovala podatke. On može da koristi akcelerometar uređaja za detekciju ciklusa hodanja (npr. kretanje gore-dole pri svakom koraku).
 
 Kako radi:
@@ -124,7 +124,7 @@ sensorManager.registerListener(object : SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }, stepCounterSensor, SensorManager.SENSOR_DELAY_UI)
 ```
-##Step Detector
+## Step Detector
 Step Detector je senzor koji detektuje pojedinačne korake korisnika. Za razliku od Step Counter-a koji daje ukupni broj koraka, Step Detector reaguje na svaki korak kao događaj, što ga čini korisnim za real-time aplikacije koje zahtevaju trenutne informacije o koraku.
 
 Kako radi:
@@ -145,7 +145,7 @@ sensorManager.registerListener(object : SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }, stepDetectorSensor, SensorManager.SENSOR_DELAY_UI)
 ```
-##Prednosti i izazovi u korišćenju senzora za praćenje koraka
+## Prednosti i izazovi u korišćenju senzora za praćenje koraka
 
 Korišćenje Step Counter i Step Detector senzora ima svoje prednosti i izazove:
 
