@@ -1,15 +1,15 @@
 # WalkApp
 **WalkApp** je mobilna aplikacija za praćenje fizičkih aktivnosti, sa posebnim fokusom na brojanje koraka i prikaz statistika o pređenim koracima po danima. Aplikacija koristi senzor koraka telefona da bi pratila kretanje korisnika u realnom vremenu, prikazujući informacije kao što su ukupan broj koraka i pređena razdaljina.
 
-##Funkcionalnosti aplikacije
+## Funkcionalnosti aplikacije
 
 - Prikaz trenutnog broja koraka i pređene razdaljine u realnom vremenu.
 - Grafikon koji vizualizuje pređene korake po datumu.
 - Čuvanje trenutnog broja koraka u Firebase bazu podataka.
 
-##Korišćenje aplikacije
+## Korišćenje aplikacije
 
-###Instalacija i pokretanje:
+### Instalacija i pokretanje:
 Klonirajte repozitorijum sa GitHub-a.
 Otvorite projekt u Android Studiju i pokrenite ga na fizičkom uređaju (zbog tačnosti senzora).
 
