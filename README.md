@@ -149,5 +149,5 @@ sensorManager.registerListener(object : SensorEventListener {
 
 Korišćenje Step Counter i Step Detector senzora ima svoje prednosti i izazove:
 
-**Prednosti:** Oba senzora su energetski efikasnija u poređenju sa korišćenjem sirovih podataka akcelerometra, jer su dizajnirana da procesiraju podatke direktno na hardveru. --
+**Prednosti:** Oba senzora su energetski efikasnija u poređenju sa korišćenjem sirovih podataka akcelerometra, jer su dizajnirana da procesiraju podatke direktno na hardveru. \n
 **Izazovi:** Preciznost može varirati između uređaja, a Step Detector može izazvati greške ako korisnik radi aktivnosti koje nisu hodanje. Takođe, Step Counter može biti resetovan pri restartovanju uređaja, pa je bitno voditi računa o tome kako se podaci skladište i ažuriraju.
