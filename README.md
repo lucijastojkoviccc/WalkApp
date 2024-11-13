@@ -14,7 +14,7 @@ Klonirajte repozitorijum sa GitHub-a.
 Otvorite projekt u Android Studiju i pokrenite ga na fizičkom uređaju (zbog tačnosti senzora).
 
 ### Dodeljivanje dozvola:
-Ako koristite **Step Counter** ili **Step Detector**, aplikacija će tražiti dozvolu za praćenje fizičke aktivnosti (ACTIVITY_RECOGNITION). Dodeljivanje dozvole je potrebno za rad senzora.
+Zbog korišćenja**Step Counter**-a i **Step Detector**-a, aplikacija će tražiti dozvolu za praćenje fizičke aktivnosti (ACTIVITY_RECOGNITION). Dodeljivanje dozvole je potrebno za rad senzora.
 
 ### Praćenje aktivnosti:
 Aplikacija će automatski početi sa brojanjem koraka čim je pokrenuta. Korisnik može pratiti svoj napredak na grafiku i resetovati brojač koraka dugim pritiskom na glavni ekran.
