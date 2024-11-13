@@ -136,10 +136,10 @@ Primer korišćenja u kodu:
 val stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 sensorManager.registerListener(object : SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
-        // Ovo se izvršava svaki put kada je detektovan novi korak
+        // Detektovan novi korak
         val stepDetected = event != null
         if (stepDetected) {
-            // Odradi akciju pri svakom koraku
+            // Akcija
         }
     }
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
