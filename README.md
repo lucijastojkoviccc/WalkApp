@@ -124,8 +124,8 @@ Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti h
 # Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
 Ova aplikacija koristi tri ključne komponente za rad sa senzorima Android uređaja:
 
-SensorManager - za upravljanje senzorima.
-Step Counter - za praćenje ukupnog broja koraka od poslednjeg resetovanja.
+SensorManager - za upravljanje senzorima.<br>
+Step Counter - za praćenje ukupnog broja koraka od poslednjeg resetovanja.<br>
 Step Detector - za otkrivanje pojedinačnih koraka u realnom vremenu.
 
 ## SensorManager
