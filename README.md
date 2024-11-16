@@ -69,6 +69,45 @@ RequestPermission(permission = android.Manifest.permission.ACTIVITY_RECOGNITION)
 
 # Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
 
+## Senzori u android uređajima
+
+Većina Android uređaja ima ugrađene senzore koji mere pokret, orijentaciju i razne uslove u okruženju. Ovi senzori mogu pružiti sirove podatke sa visokim nivoom preciznosti i tačnosti, što je korisno ako želite da pratite trodimenzionalno kretanje uređaja, njegovu poziciju, ili promene u okruženju u blizini uređaja. Za pristup ovim senzorima, Android koristi klasu SensorManager, koja omogućava otkrivanje senzora na uređaju i pristup njihovim podacima. Na primer:
+
+- Igra može pratiti očitavanja sa senzora gravitacije kako bi prepoznala složene gestove i pokrete korisnika, kao što su nagib, tresenje, rotacija ili zamah.
+- Igra može koristiti SensorManager za pristup senzoru gravitacije i pratiti očitavanja kako bi prepoznala složene gestove i pokrete korisnika, kao što su nagib, tresenje, rotacija ili zamah.
+- Aplikacija za vremensku prognozu može koristiti SensorManager za rad sa senzorima temperature i vlažnosti kako bi izračunala i prikazala tačku rose.
+Putna aplikacija može koristiti SensorManager za očitavanja senzora geomagnetnog polja i akcelerometra radi prikazivanja pravca kompasa.
+
+### Android platforma podržava tri široke kategorije senzora:
+**Senzori pokreta**
+Ovi senzori mere sile ubrzanja i rotacione sile duž tri ose. Ova kategorija uključuje:
+
+*Akcelerometar
+*Senzor gravitacije
+*Žiroskop
+*Senzor rotacionog vektora
+
+**Senzori okruženja**
+Ovi senzori mere različite parametre iz okruženja, kao što su temperatura vazduha, pritisak, osvetljenost i vlažnost. Ova kategorija uključuje:
+
+*Barometar
+*Fotometar
+*Termometar
+
+**Senzori pozicije**
+Ovi senzori mere fizičku poziciju uređaja. Ova kategorija uključuje:
+
+*Senzor orijentacije
+*Magnetometar
+
+Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti hardverski i softverski
+- Hardverski senzori su fizičke komponente ugrađene u uređaj, koje direktno mere specifične osobine okruženja, kao što su ubrzanje, snaga geomagnetnog polja ili ugaona promena.
+- Softverski senzori nisu fizički uređaji, ali oponašaju hardverske senzore. Oni dobijaju podatke kombinovanjem podataka sa jednog ili više hardverskih senzora i ponekad se nazivaju virtuelni senzori. Na primer, senzori linearne akceleracije i gravitacije spadaju u ovu grupu.
+
+**Tabela 1.** Tipovi senzora podržani od strane Android platforme
+Attempt | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
+--- | --- | --- | --- |--- |--- |--- |--- |--- |--- |--- |---
+Seconds | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
 Ova aplikacija koristi tri ključne komponente za rad sa senzorima Android uređaja:
 
 SensorManager - za upravljanje senzorima.
