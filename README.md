@@ -29,10 +29,10 @@ Aplikacija koristi Jetpack Compose za korisnički interfejs, sa sledećim glavni
 ## Firebase integracija
 
 Aplikacija koristi Firebase Firestore za skladištenje podataka o korisničkim aktivnostima. Svaki put kada korisnik sačuva aktivnost dugim pritiskom na ekran, aplikacija kreira zapis u Firestore-u koji sadrži:
-*userId: ID korisnika (Firebase Authentication)
-*steps: Ukupan broj koraka
-*distance: Pređena razdaljina u kilometrima
-*date: Datum kada su koraci pređeni
+* userId: ID korisnika (Firebase Authentication)
+* steps: Ukupan broj koraka
+* distance: Pređena razdaljina u kilometrima
+* date: Datum kada su koraci pređeni
 
 ### Kod za čuvanje podataka izgleda ovako:
 ```kotlin
@@ -80,23 +80,23 @@ Putna aplikacija može koristiti SensorManager za očitavanja senzora geomagnetn
 **Senzori pokreta**
 Ovi senzori mere sile ubrzanja i rotacione sile duž tri ose. Ova kategorija uključuje:
 
-*Akcelerometar
-*Senzor gravitacije
-*Žiroskop
-*Senzor rotacionog vektora
+* Akcelerometar
+* Senzor gravitacije
+* Žiroskop
+* Senzor rotacionog vektora
 
 **Senzori okruženja**
 Ovi senzori mere različite parametre iz okruženja, kao što su temperatura vazduha, pritisak, osvetljenost i vlažnost. Ova kategorija uključuje:
 
-*Barometar
-*Fotometar
-*Termometar
+* Barometar
+* Fotometar
+* Termometar
 
 **Senzori pozicije**
 Ovi senzori mere fizičku poziciju uređaja. Ova kategorija uključuje:
 
-*Senzor orijentacije
-*Magnetometar
+* Senzor orijentacije
+* Magnetometar
 
 Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti hardverski i softverski
 - Hardverski senzori su fizičke komponente ugrađene u uređaj, koje direktno mere specifične osobine okruženja, kao što su ubrzanje, snaga geomagnetnog polja ili ugaona promena.
@@ -177,9 +177,9 @@ Tabela 2 sumira dostupnost svakog senzora po verzijama platforme. Samo četiri p
 # Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
 Ova aplikacija koristi tri ključne komponente za rad sa senzorima Android uređaja:
 
-SensorManager - za upravljanje senzorima.<br>
-Step Counter - za praćenje ukupnog broja koraka od poslednjeg resetovanja.<br>
-Step Detector - za otkrivanje pojedinačnih koraka u realnom vremenu.
+**SensorManager** - za upravljanje senzorima.<br>
+**Step Counter** - za praćenje ukupnog broja koraka od poslednjeg resetovanja.<br>
+**Step Detector** - za otkrivanje pojedinačnih koraka u realnom vremenu.
 
 ## SensorManager
 
@@ -188,13 +188,13 @@ Kao što je već pomenuto, **SensorManager** je klasa u Android SDK koja omoguć
 
 ### Osnovni koraci za rad sa SensorManager-om:
 
-**Instanciranje:** 
+**Instanciranje** <br>
 Prvo, potrebno je dobiti instancu SensorManager preko konteksta aplikacije:
 
 ```kotlin
 val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 ```
-**Pronalaženje senzora:**
+**Pronalaženje senzora**<br>
 Nakon toga, možemo pronaći željeni senzor (u ovom slučaju Step Counter i Step Detector) koristeći:
 
 ```kotlin
@@ -202,13 +202,13 @@ val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 val stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 ```
 
-**Registracija senzora:** 
+**Registracija senzora**<br> 
 SensorManager omogućava registraciju senzorskih događaja, što znači da možemo slušati promene u vrednostima senzora. Registrujemo SensorEventListener koji će reagovati na promene u senzoru.
 
 ```kotlin
 sensorManager.registerListener(stepListener, stepCounterSensor, SensorManager.SENSOR_DELAY_UI)
 ```
-**Odjava senzora:**
+**Odjava senzora**<br>
 Kada senzor više nije potreban (npr. kada korisnik zatvori aplikaciju), preporučuje se da odjavimo SensorEventListener kako bismo uštedeli bateriju:
 
 ```kotlin
@@ -217,9 +217,9 @@ sensorManager.unregisterListener(stepListener)
 ## Step Counter
 Step Counter je vrsta senzora koji broji ukupne korake od trenutka kada je uređaj uključen ili kada je aplikacija resetovala podatke. On može da koristi akcelerometar uređaja za detekciju ciklusa hodanja (npr. kretanje gore-dole pri svakom koraku).
 
-Kako radi:
+Kako radi: <br>
 Step Counter vraća ukupan broj koraka kao relativnu vrednost, tj. od trenutka kada je senzor prvi put pokrenut.
-Ova vrednost nije resetovana dok se uređaj ne restartuje ili senzor ne resetuje, što znači da aplikacija mora pratiti razliku između prethodno očitanih i trenutno očitanih koraka.
+Ova vrednost nije resetovana dok se uređaj ne restartuje ili senzor ne resetuje, što znači da aplikacija mora pratiti razliku između prethodno očitanih i trenutno očitanih koraka. <br>
 
 Primer korišćenja u kodu:
 
@@ -235,9 +235,9 @@ sensorManager.registerListener(object : SensorEventListener {
 ## Step Detector
 Step Detector je senzor koji detektuje pojedinačne korake korisnika. Za razliku od Step Counter-a koji daje ukupni broj koraka, Step Detector reaguje na svaki korak kao događaj, što ga čini korisnim za real-time aplikacije koje zahtevaju trenutne informacije o koraku.
 
-Kako radi:
+Kako radi: <br>
 Kada korisnik napravi korak, Step Detector generiše događaj koji se može iskoristiti za azuriranje interfejsa u realnom vremenu.
-Ovaj senzor koristi algoritme za prepoznavanje uzorka koraka i može varirati u preciznosti zavisno od uređaja.
+Ovaj senzor koristi algoritme za prepoznavanje uzorka koraka i može varirati u preciznosti zavisno od uređaja. <br>
 Primer korišćenja u kodu:
 
 ```kotlin
