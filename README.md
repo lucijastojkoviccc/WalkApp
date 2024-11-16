@@ -120,6 +120,59 @@ Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti h
 | **TYPE_ROTATION_VECTOR**    | Software or Hardware | Meri orijentaciju uređaja pružajući tri elementa vektora rotacije uređaja.                                                                     | Detekcija pokreta i rotacije.             |
 | **TYPE_TEMPERATURE**        | Hardware           | Meri temperaturu uređaja u stepenima Celzijusa (°C). Ova implementacija senzora varira između uređaja, a ovaj senzor je zamenjen senzorom `TYPE_AMBIENT_TEMPERATURE` na API nivou 14. | Praćenje temperature.                     |
                                       
+### Sensor Framework 
+Možete pristupiti ovim senzorima i dobiti sirove podatke senzora koristeći Android senzorski okvir. Senzor framework je deo paketa android.hardware i uključuje sledeće klase i interfejse:
+
+**SensorManager**
+Ova klasa se koristi za kreiranje instance servisa senzora. Ona pruža različite metode za pristup i listanje senzora, registrovanje i odregistrovanje slušaoca događaja senzora, kao i za dobijanje informacija o orijentaciji. Takođe pruža više konstanti senzora koje se koriste za izveštavanje o tačnosti senzora, podešavanje brzine prikupljanja podataka i kalibraciju senzora.
+
+**Sensor**
+Ova klasa omogućava kreiranje instance određenog senzora. Pruža različite metode koje vam omogućavaju da odredite mogućnosti senzora.
+
+**SensorEvent**
+Sistem koristi ovu klasu za kreiranje objekta događaja senzora, koji pruža informacije o događaju senzora. Objekat događaja senzora uključuje sledeće informacije: sirove podatke senzora, tip senzora koji je generisao događaj, tačnost podataka i vremensku oznaku za događaj.
+
+**SensorEventListener**
+Ovaj interfejs omogućava kreiranje dve metode povratnog poziva koje primaju obaveštenja (događaje senzora) kada se vrednosti senzora promene ili kada se promeni tačnost senzora.
+
+### Osnovni zadaci senzorskih API-ja
+U tipičnoj aplikaciji, senzorski API-ji se koriste za obavljanje dva osnovna zadatka:
+
+**1. Identifikacija senzora i njihovih mogućnosti**
+Identifikacija senzora i njihovih mogućnosti u runtime-u je korisna ako vaša aplikacija ima funkcije koje se oslanjaju na određene tipove senzora ili njihove mogućnosti. Na primer, možda ćete želeti da identifikujete sve senzore prisutne na uređaju i da onemogućite bilo koje funkcije aplikacije koje zavise od senzora koji nisu prisutni. Takođe, možete identifikovati sve senzore određenog tipa kako biste odabrali implementaciju senzora koja ima optimalne performanse za vašu aplikaciju.
+
+**2. Praćenje događaja senzora**
+Praćenje događaja senzora omogućava vam dobijanje sirovih podataka senzora. Događaj senzora se javlja svaki put kada senzor detektuje promenu u parametrima koje meri. Događaj senzora pruža četiri ključne informacije: naziv senzora koji je pokrenuo događaj, vremensku oznaku događaja, tačnost događaja i sirove podatke senzora koji su pokrenuli događaj.
+
+### Dostupnost senzora
+Dostupnost senzora varira od uređaja do uređaja, ali može varirati i između različitih verzija Android platforme. Ovo je zato što su Android senzori postepeno uvodili tokom nekoliko izdanja platforme. Na primer:
+
+Mnogi senzori su uvedeni u Android 1.5 (API nivo 3), ali neki nisu bili implementirani niti dostupni za upotrebu sve do Android 2.3 (API nivo 9).
+Slično tome, nekoliko senzora je uvedeno u Android 2.3 (API nivo 9) i Android 4.0 (API nivo 14).
+Dva senzora su zastarela i zamenjena novim, boljim senzorima.
+Tabela 2 sumira dostupnost svakog senzora po verzijama platforme. Samo četiri platforme su navedene jer su one uključivale promene vezane za senzore. Senzori koji su označeni kao zastareli i dalje su dostupni na sledećim platformama (pod uslovom da je senzor prisutan na uređaju), što je u skladu sa politikom unazadne kompatibilnosti Androida.
+
+**Tabela 2.** Dostupnost senzora po platformama
+
+| **Sensor**                 | **Android 4.0** (API Level 14) | **Android 2.3** (API Level 9) | **Android 2.2** (API Level 8) | **Android 1.5** (API Level 3) |
+|----------------------------|---------------------------------|--------------------------------|--------------------------------|--------------------------------|
+| TYPE_ACCELEROMETER         | Da                              | Da                             | Da                             | Da                             |
+| TYPE_AMBIENT_TEMPERATURE   | Da                              | n/a                            | n/a                            | n/a                            |
+| TYPE_GRAVITY               | Da                              | Da                             | n/a                            | n/a                            |
+| TYPE_GYROSCOPE             | Da                              | Da                             | n/a¹                           | n/a¹                           |
+| TYPE_LIGHT                 | Da                              | Da                             | Da                             | Da                             |
+| TYPE_LINEAR_ACCELERATION   | Da                              | Da                             | n/a                            | n/a                            |
+| TYPE_MAGNETIC_FIELD        | Da                              | Da                             | Da                             | Da                             |
+| TYPE_ORIENTATION           | Da²                             | Da²                            | Da²                            | Da                             |
+| TYPE_PRESSURE              | Da                              | Da                             | n/a                            | n/a                            |
+| TYPE_PROXIMITY             | Da                              | Da                             | Da                             | Da                             |
+| TYPE_RELATIVE_HUMIDITY     | Da                              | Da                             | n/a                            | n/a                            |
+| TYPE_ROTATION_VECTOR       | Da                              | Da                             | n/a                            | n/a                            |
+| TYPE_TEMPERATURE           | Da²                             | Da²                            | n/a                            | n/a                            |
+
+¹ Nije dostupno na svim uređajima sa Android 2.2 i starijim.  
+² Ovaj senzor je zastareo i zamenjen boljim senzorima u API Level 14.
+
 
 # Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
 Ova aplikacija koristi tri ključne komponente za rad sa senzorima Android uređaja:
@@ -130,7 +183,7 @@ Step Detector - za otkrivanje pojedinačnih koraka u realnom vremenu.
 
 ## SensorManager
 
-**SensorManager** je klasa u Android SDK koja omogućava pristup senzorima dostupnim na uređaju, kao što su akcelerometar, žiroskop, barometar i drugi. Koristi se za upravljanje i rad sa senzorima, uključujući Step Counter i Step Detector. 
+Kao što je već pomenuto, **SensorManager** je klasa u Android SDK koja omogućava pristup senzorima dostupnim na uređaju, kao što su akcelerometar, žiroskop, barometar i drugi. Koristi se za upravljanje i rad sa senzorima, uključujući Step Counter i Step Detector. 
 
 
 ### Osnovni koraci za rad sa SensorManager-om:
