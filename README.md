@@ -121,15 +121,13 @@ Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti h
 | **TYPE_TEMPERATURE**        | Hardware           | Meri temperaturu uređaja u stepenima Celzijusa (°C). Ova implementacija senzora varira između uređaja, a ovaj senzor je zamenjen senzorom `TYPE_AMBIENT_TEMPERATURE` na API nivou 14. | Praćenje temperature.                     |
                                       
 
-
-
+# Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
 Ova aplikacija koristi tri ključne komponente za rad sa senzorima Android uređaja:
 
 SensorManager - za upravljanje senzorima.
 Step Counter - za praćenje ukupnog broja koraka od poslednjeg resetovanja.
 Step Detector - za otkrivanje pojedinačnih koraka u realnom vremenu.
 
-# Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
 ## SensorManager
 
 **SensorManager** je klasa u Android SDK koja omogućava pristup senzorima dostupnim na uređaju, kao što su akcelerometar, žiroskop, barometar i drugi. Koristi se za upravljanje i rad sa senzorima, uključujući Step Counter i Step Detector. 
