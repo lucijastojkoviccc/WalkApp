@@ -119,7 +119,7 @@ Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti h
 | **TYPE_RELATIVE_HUMIDITY**  | Hardware           | Meri relativnu vlažnost vazduha u okruženju u procentima (%).                                                                                  | Praćenje tačke rose, apsolutne i relativne vlažnosti. |
 | **TYPE_ROTATION_VECTOR**    | Software or Hardware | Meri orijentaciju uređaja pružajući tri elementa vektora rotacije uređaja.                                                                     | Detekcija pokreta i rotacije.             |
 | **TYPE_TEMPERATURE**        | Hardware           | Meri temperaturu uređaja u stepenima Celzijusa (°C). Ova implementacija senzora varira između uređaja, a ovaj senzor je zamenjen senzorom `TYPE_AMBIENT_TEMPERATURE` na API nivou 14. | Praćenje temperature.                     |
-                                      |
+                                      
 
 
 
