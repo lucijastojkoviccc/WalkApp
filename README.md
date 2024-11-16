@@ -67,9 +67,7 @@ RequestPermission(permission = android.Manifest.permission.ACTIVITY_RECOGNITION)
 }
 ```
 
-# Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
-
-## Senzori u android uređajima
+# Senzori u android uređajima
 
 Većina Android uređaja ima ugrađene senzore koji mere pokret, orijentaciju i razne uslove u okruženju. Ovi senzori mogu pružiti sirove podatke sa visokim nivoom preciznosti i tačnosti, što je korisno ako želite da pratite trodimenzionalno kretanje uređaja, njegovu poziciju, ili promene u okruženju u blizini uređaja. Za pristup ovim senzorima, Android koristi klasu SensorManager, koja omogućava otkrivanje senzora na uređaju i pristup njihovim podacima. Na primer:
 
@@ -114,6 +112,7 @@ SensorManager - za upravljanje senzorima.
 Step Counter - za praćenje ukupnog broja koraka od poslednjeg resetovanja.
 Step Detector - za otkrivanje pojedinačnih koraka u realnom vremenu.
 
+# Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
 ## SensorManager
 
 **SensorManager** je klasa u Android SDK koja omogućava pristup senzorima dostupnim na uređaju, kao što su akcelerometar, žiroskop, barometar i drugi. Koristi se za upravljanje i rad sa senzorima, uključujući Step Counter i Step Detector. 
