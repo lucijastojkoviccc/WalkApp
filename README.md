@@ -220,7 +220,6 @@ Step Counter je vrsta senzora koji broji ukupne korake od trenutka kada je uređ
 Kako radi: <br>
 Step Counter vraća ukupan broj koraka kao relativnu vrednost, tj. od trenutka kada je senzor prvi put pokrenut.
 Ova vrednost nije resetovana dok se uređaj ne restartuje ili senzor ne resetuje, što znači da aplikacija mora pratiti razliku između prethodno očitanih i trenutno očitanih koraka. <br>
-
 Primer korišćenja u kodu:
 
 ```kotlin
@@ -237,7 +236,7 @@ Step Detector je senzor koji detektuje pojedinačne korake korisnika. Za razliku
 
 Kako radi: <br>
 Kada korisnik napravi korak, Step Detector generiše događaj koji se može iskoristiti za azuriranje interfejsa u realnom vremenu.
-Ovaj senzor koristi algoritme za prepoznavanje uzorka koraka i može varirati u preciznosti zavisno od uređaja. <br>
+Ovaj senzor koristi algoritme za prepoznavanje uzorka koraka i može varirati u preciznosti zavisno od uređaja.<br>
 Primer korišćenja u kodu:
 
 ```kotlin
