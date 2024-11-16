@@ -10,7 +10,7 @@
 ## Korišćenje aplikacije
 
 ### Instalacija i pokretanje:
-Klonirajte repozitorijum sa GitHub-a.
+Potrebno je klonirati repozitorijum sa GitHub-a.
 Otvorite projekt u Android Studiju i pokrenite ga na fizičkom uređaju (zbog tačnosti senzora).
 
 ### Dodeljivanje dozvola:
@@ -50,10 +50,10 @@ fun saveWalkData(stepCount: Int, distance: Float) {
     db.collection("walks")
         .add(walkData)
         .addOnSuccessListener {
-            Log.d("HomeScreenContent", "Walk data successfully saved!")
+            Log.d("Steps", "Steps saved successfully!")
         }
         .addOnFailureListener { e ->
-            Log.e("HomeScreenContent", "Error saving walk data", e)
+            Log.e("Steps", "Error saving steps", e)
         }
 }
 ```
@@ -77,7 +77,10 @@ Step Detector - za otkrivanje pojedinačnih koraka u realnom vremenu.
 
 ## SensorManager
 
-**SensorManager** je klasa u Android SDK koja omogućava pristup senzorima dostupnim na uređaju, kao što su akcelerometar, žiroskop, barometar i drugi. Koristi se za upravljanje i rad sa senzorima, uključujući Step Counter i Step Detector. Evo osnovnih koraka za rad sa SensorManager:
+**SensorManager** je klasa u Android SDK koja omogućava pristup senzorima dostupnim na uređaju, kao što su akcelerometar, žiroskop, barometar i drugi. Koristi se za upravljanje i rad sa senzorima, uključujući Step Counter i Step Detector. 
+
+
+### Osnovni koraci za rad sa SensorManager-om:
 
 **Instanciranje:** 
 Prvo, potrebno je dobiti instancu SensorManager preko konteksta aplikacije:
@@ -119,7 +122,6 @@ val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 sensorManager.registerListener(object : SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         val steps = event?.values?.get(0) ?: 0
-        // Koristi steps promenljivu za ažuriranje UI ili čuvanje u bazi
     }
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }, stepCounterSensor, SensorManager.SENSOR_DELAY_UI)
@@ -136,10 +138,9 @@ Primer korišćenja u kodu:
 val stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 sensorManager.registerListener(object : SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
-        // Detektovan novi korak
         val stepDetected = event != null
         if (stepDetected) {
-            // Akcija
+            _stepCount.value += 1
         }
     }
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
