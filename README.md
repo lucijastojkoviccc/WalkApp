@@ -12,6 +12,7 @@
 ### Instalacija i pokretanje:
 Potrebno je klonirati repozitorijum sa GitHub-a.
 Otvorite projekt u Android Studiju i pokrenite ga na fizičkom uređaju (zbog tačnosti senzora).
+Link za Android Studio: https://developer.android.com/studio?gad_source=1&gclid=CjwKCAiArva5BhBiEiwA-oTnXebND3uwqOzQUdjaP0jn8-r2KLkHT8W6xufisp6Pr9M06WCaBWh4YhoCxT4QAvD_BwE&gclsrc=aw.ds
 
 ### Dodeljivanje dozvola:
 Zbog korišćenja**Step Counter**-a i **Step Detector**-a, aplikacija će tražiti dozvolu za praćenje fizičke aktivnosti (ACTIVITY_RECOGNITION). Dodeljivanje dozvole je potrebno za rad senzora.
