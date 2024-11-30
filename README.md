@@ -270,7 +270,7 @@ Akcelerometar je senzor koji meri ubrzanje uređaja duž tri ose: x, y i z. Ove 
 Kako radi:
 Akcelerometar meri linearno ubrzanje uređaja u m/s². Kada je uređaj u mirovanju, prikazuje ubrzanje zbog gravitacije (oko 9.8 m/s² na osi z).
 Dinamičke promene (npr. nagli pad) se detektuju na osnovu promene magnitude ubrzanja.
-Upotreba u aplikaciji: Akcelerometar se koristi za detekciju naglih promena ubrzanja koje mogu ukazivati na pad. 
+Upotreba u aplikaciji: Akcelerometar se koristi za detekciju naglih promena ubrzanja koje mogu ukazivati na pad. <br>
 Primer korišćenja u kodu:
 
 ```kotlin
