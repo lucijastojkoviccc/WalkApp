@@ -271,7 +271,6 @@ Kako radi:
 Akcelerometar meri linearno ubrzanje uređaja u m/s². Kada je uređaj u mirovanju, prikazuje ubrzanje zbog gravitacije (oko 9.8 m/s² na osi z).
 Dinamičke promene (npr. nagli pad) se detektuju na osnovu promene magnitude ubrzanja.
 Upotreba u aplikaciji: Akcelerometar se koristi za detekciju naglih promena ubrzanja koje mogu ukazivati na pad. 
-
 Primer korišćenja u kodu:
 
 ```kotlin
@@ -290,7 +289,7 @@ if (accelerationMagnitude > 30) { // Prag za detekciju pada
 
 Kako radi:
 Izmerene vrednosti su u radijanima po sekundi (rad/s).
-Pomaže u identifikaciji rotacija koje često prate padove (npr. rotacija uređaja dok korisnik pada).
+Pomaže u identifikaciji rotacija koje često prate padove (npr. rotacija uređaja dok korisnik pada). <br>
 Primer korišćenja u kodu:
 
 ```kotlin
