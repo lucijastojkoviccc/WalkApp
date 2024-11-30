@@ -274,14 +274,15 @@ Upotreba u aplikaciji: Akcelerometar se koristi za detekciju naglih promena ubrz
 Primer korišćenja u kodu:
 
 ```kotlin
-val x = event.values[0]
-val y = event.values[1]
-val z = event.values[2]
-val accelerationMagnitude = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+Sensor.TYPE_ACCELEROMETER -> {
+                            val x = event.values[0]
+                            val y = event.values[1]
+                            val z = event.values[2]
 
-if (accelerationMagnitude > 30) { // Prag za detekciju pada
-    onFallDetected()
-}
+                            // Magnituda ubrzanja
+                            accelerationMagnitude =
+                                Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+                        }
 ```
 ## Žiroskop (Gyroscope)
 Žiroskop meri ugaone brzine rotacije uređaja oko njegovih osa: x, y i z. Za razliku od akcelerometra, koji meri linearno ubrzanje, žiroskop detektuje rotacione pokrete.
@@ -292,14 +293,15 @@ Pomaže u identifikaciji rotacija koje često prate padove (npr. rotacija uređa
 Primer korišćenja u kodu:
 
 ```kotlin
-val x = event.values[0]
-val y = event.values[1]
-val z = event.values[2]
-val angularVelocityMagnitude = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+Sensor.TYPE_GYROSCOPE -> {
+                            val x = event.values[0]
+                            val y = event.values[1]
+                            val z = event.values[2]
 
-if (angularVelocityMagnitude > 5) { // Prag za detekciju rotacije
-    onFallDetected()
-}
+                            // Magnituda ugaone brzine
+                            angularVelocityMagnitude =
+                                Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+                        }
 ```
 ## Prednosti i izazovi u upotrebi akcelerometra i žiroskopa
 **Prednosti:**
