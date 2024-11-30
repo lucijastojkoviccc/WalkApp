@@ -278,10 +278,7 @@ Sensor.TYPE_ACCELEROMETER -> {
                             val x = event.values[0]
                             val y = event.values[1]
                             val z = event.values[2]
-
-                            // Magnituda ubrzanja
-                            accelerationMagnitude =
-                                Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+                            accelerationMagnitude = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
                         }
 ```
 ## Žiroskop (Gyroscope)
@@ -297,10 +294,7 @@ Sensor.TYPE_GYROSCOPE -> {
                             val x = event.values[0]
                             val y = event.values[1]
                             val z = event.values[2]
-
-                            // Magnituda ugaone brzine
-                            angularVelocityMagnitude =
-                                Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+                            angularVelocityMagnitude = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
                         }
 ```
 ## Prednosti i izazovi u upotrebi akcelerometra i žiroskopa
