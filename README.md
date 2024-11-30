@@ -274,7 +274,6 @@ Upotreba u aplikaciji: Akcelerometar se koristi za detekciju naglih promena ubrz
 Primer korišćenja u kodu:
 
 ```kotlin
-Code kopieren
 val x = event.values[0]
 val y = event.values[1]
 val z = event.values[2]
@@ -293,7 +292,6 @@ Pomaže u identifikaciji rotacija koje često prate padove (npr. rotacija uređa
 Primer korišćenja u kodu:
 
 ```kotlin
-Code kopieren
 val x = event.values[0]
 val y = event.values[1]
 val z = event.values[2]
