@@ -175,12 +175,14 @@ Tabela 2 sumira dostupnost svakog senzora po verzijama platforme. Samo četiri p
 ² Ovaj senzor je zastareo i zamenjen boljim senzorima u API Level 14.
 
 
-# Ključne komponente: *Sensor Manager*, *Step Counter* i *Step Detector*
+# Ključne komponente
 Ova aplikacija koristi tri ključne komponente za rad sa senzorima Android uređaja:
 
 **SensorManager** - za upravljanje senzorima.<br>
 **Step Counter** - za praćenje ukupnog broja koraka od poslednjeg resetovanja.<br>
 **Step Detector** - za otkrivanje pojedinačnih koraka u realnom vremenu.
+**Accelerometer** - za merenje linearnog ubrzanja uređaja duž tri ose: x, y, z
+**Gyroscope** - za merenje ugaone brzine rotacije oko njegovih osa: x, y, z
 
 ## SensorManager
 
@@ -196,11 +198,13 @@ Prvo, potrebno je dobiti instancu SensorManager preko konteksta aplikacije:
 val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 ```
 **Pronalaženje senzora**<br>
-Nakon toga, možemo pronaći željeni senzor (u ovom slučaju Step Counter i Step Detector) koristeći:
+Nakon toga, možemo pronaći željeni senzor koristeći:
 
 ```kotlin
 val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 val stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+val stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 ```
 
 **Registracija senzora**<br> 
@@ -259,3 +263,54 @@ Korišćenje Step Counter i Step Detector senzora ima svoje prednosti i izazove:
 **Prednosti:** Oba senzora su energetski efikasnija u poređenju sa korišćenjem sirovih podataka akcelerometra, jer su dizajnirana da procesiraju podatke direktno na hardveru. 
 
 **Izazovi:** Preciznost može varirati između uređaja, a Step Detector može izazvati greške ako korisnik radi aktivnosti koje nisu hodanje. Takođe, Step Counter može biti resetovan pri restartovanju uređaja, pa je bitno voditi računa o tome kako se podaci skladište i ažuriraju.
+
+## Akcelerometar (Accelerometer)
+Akcelerometar je senzor koji meri ubrzanje uređaja duž tri ose: x, y i z. Ove vrednosti omogućavaju detekciju promena u brzini i pravcu kretanja uređaja.
+
+Kako radi:
+Akcelerometar meri linearno ubrzanje uređaja u m/s². Kada je uređaj u mirovanju, prikazuje ubrzanje zbog gravitacije (oko 9.8 m/s² na osi z).
+Dinamičke promene (npr. nagli pad) se detektuju na osnovu promene magnitude ubrzanja.
+Upotreba u aplikaciji: Akcelerometar se koristi za detekciju naglih promena ubrzanja koje mogu ukazivati na pad. 
+
+Primer korišćenja u kodu:
+
+```kotlin
+Code kopieren
+val x = event.values[0]
+val y = event.values[1]
+val z = event.values[2]
+val accelerationMagnitude = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+
+if (accelerationMagnitude > 30) { // Prag za detekciju pada
+    onFallDetected()
+}
+```
+## Žiroskop (Gyroscope)
+Žiroskop meri ugaone brzine rotacije uređaja oko njegovih osa: x, y i z. Za razliku od akcelerometra, koji meri linearno ubrzanje, žiroskop detektuje rotacione pokrete.
+
+Kako radi:
+Izmerene vrednosti su u radijanima po sekundi (rad/s).
+Pomaže u identifikaciji rotacija koje često prate padove (npr. rotacija uređaja dok korisnik pada).
+Primer korišćenja u kodu:
+
+```kotlin
+Code kopieren
+val x = event.values[0]
+val y = event.values[1]
+val z = event.values[2]
+val angularVelocityMagnitude = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+
+if (angularVelocityMagnitude > 5) { // Prag za detekciju rotacije
+    onFallDetected()
+}
+```
+## Prednosti i izazovi u upotrebi akcelerometra i žiroskopa
+**Prednosti:**
+Veća preciznost pri detekciji kompleksnih pokreta, poput pada.
+Smanjen broj lažnih alarma zahvaljujući dodatnim informacijama iz žiroskopa.
+Energetski efikasni u poređenju sa alternativnim metodama (npr. mašinsko učenje na sirovim podacima).
+**Izazovi:**
+Pragovi za ubrzanje i rotaciju moraju se fino podešavati na osnovu testiranja kako bi se izbegli lažni alarmi.
+Različiti uređaji imaju senzore različitog kvaliteta, što može uticati na preciznost.
+
+Akcelerometar i žiroskop su ključni senzori za aplikacije koje zahtevaju detekciju pada ili naprednu analizu kretanja. Njihova kombinovana upotreba omogućava preciznije rezultate u realnom vremenu, dok se istovremeno smanjuje broj lažnih alarma.
