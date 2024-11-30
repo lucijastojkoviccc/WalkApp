@@ -63,6 +63,28 @@ fun HomeScreenContent(
     viewModel: StepCounterViewModel = viewModel()
 ) {
 
+    // State to control the dialog visibility
+    var showFallDialog by remember { mutableStateOf(false) }
+
+    // Fall detection system
+    FallDetectionSystem(
+        onFallDetected = { showFallDialog = true }
+    )
+
+    // Show dialog when fall is detected
+    if (showFallDialog) {
+        ShowFallDialog(
+            onYesClick = {
+                showFallDialog = false
+                // Logic if user is okay
+            },
+            onNoClick = {
+                showFallDialog = false
+                // Logic if user is not okay
+            }
+        )
+    }
+
     val scope = rememberCoroutineScope()
     val stepCount by viewModel.stepCount.collectAsState()
 

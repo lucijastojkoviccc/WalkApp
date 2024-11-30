@@ -50,7 +50,7 @@ class StepCounterViewModel(application: Application) : AndroidViewModel(applicat
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (event.sensor.type == Sensor.TYPE_STEP_DETECTOR) {
-               _stepCount.value += 1
+                _stepCount.value += 1
 
             }
         }

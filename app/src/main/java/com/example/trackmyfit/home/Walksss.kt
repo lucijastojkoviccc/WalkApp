@@ -132,7 +132,3 @@ fun WalkBar(totalSteps: Int, date: Date) {
         )
     }
 }
-
-
-
-
