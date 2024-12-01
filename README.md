@@ -124,16 +124,16 @@ Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti h
 ### Sensor Framework 
 Možete pristupiti ovim senzorima i dobiti sirove podatke senzora koristeći Android senzorski okvir. Senzor framework je deo paketa android.hardware i uključuje sledeće klase i interfejse:
 
-**SensorManager**
+**SensorManager** <br>
 Ova klasa se koristi za kreiranje instance servisa senzora. Ona pruža različite metode za pristup i listanje senzora, registrovanje i odregistrovanje slušaoca događaja senzora, kao i za dobijanje informacija o orijentaciji. Takođe pruža više konstanti senzora koje se koriste za izveštavanje o tačnosti senzora, podešavanje brzine prikupljanja podataka i kalibraciju senzora.
 
-**Sensor**
+**Sensor**<br>
 Ova klasa omogućava kreiranje instance određenog senzora. Pruža različite metode koje vam omogućavaju da odredite mogućnosti senzora.
 
-**SensorEvent**
+**SensorEvent**<br>
 Sistem koristi ovu klasu za kreiranje objekta događaja senzora, koji pruža informacije o događaju senzora. Objekat događaja senzora uključuje sledeće informacije: sirove podatke senzora, tip senzora koji je generisao događaj, tačnost podataka i vremensku oznaku za događaj.
 
-**SensorEventListener**
+**SensorEventListener**<br>
 Ovaj interfejs omogućava kreiranje dve metode povratnog poziva koje primaju obaveštenja (događaje senzora) kada se vrednosti senzora promene ili kada se promeni tačnost senzora.
 
 ### Osnovni zadaci senzorskih API-ja
@@ -176,7 +176,7 @@ Tabela 2 sumira dostupnost svakog senzora po verzijama platforme. Samo četiri p
 
 
 # Ključne komponente
-Ova aplikacija koristi tri ključne komponente za rad sa senzorima Android uređaja:
+Ova aplikacija koristi pet ključnih komponenti za rad sa senzorima Android uređaja:
 
 **SensorManager** - za upravljanje senzorima.<br>
 **Step Counter** - za praćenje ukupnog broja koraka od poslednjeg resetovanja.<br>
