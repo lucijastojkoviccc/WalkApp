@@ -184,8 +184,8 @@ Ova aplikacija koristi pet ključnih komponenti za rad sa senzorima Android ure�
 
 **SensorManager** - za upravljanje senzorima.<br>
 **Step Counter** - za praćenje ukupnog broja koraka od poslednjeg resetovanja.<br>
-**Step Detector** - za otkrivanje pojedinačnih koraka u realnom vremenu.
-**Accelerometer** - za merenje linearnog ubrzanja duž tri ose: x, y, z
+**Step Detector** - za otkrivanje pojedinačnih koraka u realnom vremenu. <br>
+**Accelerometer** - za merenje linearnog ubrzanja duž tri ose: x, y, z <br>
 **Gyroscope** - za merenje ugaone brzine rotacije oko njegovih osa: x, y, z
 
 ## SensorManager
