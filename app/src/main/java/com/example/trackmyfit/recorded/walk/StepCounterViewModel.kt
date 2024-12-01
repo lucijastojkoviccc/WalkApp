@@ -19,54 +19,79 @@ import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 
-class StepCounterViewModel(application: Application) : AndroidViewModel(application), SensorEventListener{
+class StepCounterViewModel(application: Application) : AndroidViewModel(application), SensorEventListener {
     private val _stepCount = MutableStateFlow(0)
     val stepCount: StateFlow<Int> = _stepCount
 
     private var sensorManager: SensorManager? = null
-    private var stepSensor: Sensor? = null
-    private var isStepSensorAvailable = false
+    private var stepDetectorSensor: Sensor? = null
+    private var stepCounterSensor: Sensor? = null
+    private var isStepDetectorAvailable = false
+    private var isStepCounterAvailable = false
+    private var initialStepCount = -1 // Početna vrednost za Step Counter
 
     init {
-        sensorManager = application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        stepSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 
-        if (stepSensor != null) {
-            isStepSensorAvailable = true
+        sensorManager = application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+        stepCounterSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+        if (stepDetectorSensor != null) {
+            isStepDetectorAvailable = true
         } else {
-            Log.e("Step", "Step sensor not available!")
+            Log.e("Step", "Step Detector sensor not available!")
+        }
+
+        if (stepCounterSensor != null) {
+            isStepCounterAvailable = true
+        } else {
+            Log.e("Step", "Step Counter sensor not available!")
         }
     }
 
-
     fun registerSensor() {
-        stepSensor?.also { sensor ->
+        stepDetectorSensor?.also { sensor ->
+            sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+        stepCounterSensor?.also { sensor ->
             sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
+
     fun unregisterSensor() {
         sensorManager?.unregisterListener(this)
     }
+
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
-            if (event.sensor.type == Sensor.TYPE_STEP_DETECTOR) {
-                _stepCount.value += 1
-
+            when (event.sensor.type) {
+                Sensor.TYPE_STEP_DETECTOR -> {
+                    _stepCount.value += 1
+                }
+                Sensor.TYPE_STEP_COUNTER -> {
+                    if (initialStepCount == -1) {
+                        initialStepCount = event.values[0].toInt()
+                    }
+                    _stepCount.value = event.values[0].toInt() - initialStepCount
+                }
             }
         }
     }
-    fun resetStepCount() {
-        _stepCount.value = 0
-    }
+
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // No-op
     }
 
-    fun calculateDistanceWalked(steps: Int, height: Float): Float {
-
-        val strideLength =  height * 0.414f
-        val distanceInMeters = steps * strideLength
-        return distanceInMeters / 1000f
+    fun resetStepCount() {
+        // Reset Step Counter vrednosti tako što se osvežava početna vrednost
+        initialStepCount = -1
+        _stepCount.value = 0
     }
 
+    fun calculateDistanceWalked(steps: Int, height: Float): Float {
+        val strideLength = height * 0.414f // Dužina koraka u metrima
+        val distanceInMeters = steps * strideLength
+        return distanceInMeters / 1000f // U kilometrima
+    }
 }
