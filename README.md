@@ -175,7 +175,7 @@ Tabela 2 sumira dostupnost svakog senzora po verzijama platforme. Samo četiri p
 ² Ovaj senzor je zastareo i zamenjen boljim senzorima u API Level 14.
 
 
-# Ključne komponente
+# Ključne komponente WalkApp aplikacije
 Ova aplikacija koristi pet ključnih komponenti za rad sa senzorima Android uređaja:
 
 **SensorManager** - za upravljanje senzorima.<br>
