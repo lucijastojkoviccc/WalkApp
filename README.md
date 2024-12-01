@@ -305,7 +305,7 @@ Sensor.TYPE_GYROSCOPE -> {
 **Prednosti:**
 Veća preciznost pri detekciji kompleksnih pokreta, poput pada.
 Smanjen broj lažnih alarma zahvaljujući dodatnim informacijama iz žiroskopa.
-Energetski efikasni u poređenju sa alternativnim metodama (npr. mašinsko učenje na sirovim podacima).
+Energetski efikasni u poređenju sa alternativnim metodama (npr. mašinsko učenje na sirovim podacima).<br>
 **Izazovi:**
 Pragovi za ubrzanje i rotaciju moraju se fino podešavati na osnovu testiranja kako bi se izbegli lažni alarmi.
 Različiti uređaji imaju senzore različitog kvaliteta, što može uticati na preciznost.
