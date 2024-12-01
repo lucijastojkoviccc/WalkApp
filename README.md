@@ -138,8 +138,8 @@ Sistem koristi ovu klasu za kreiranje objekta događaja senzora, koji pruža inf
 **SensorEventListener**<br>
 Ovaj interfejs omogućava kreiranje dve metode povratnog poziva koje primaju obaveštenja (događaje senzora) kada se vrednosti senzora promene ili kada se promeni tačnost senzora.
 
-### Osnovni zadaci senzorskih API-ja
-U tipičnoj aplikaciji, senzorski API-ji se koriste za obavljanje dva osnovna zadatka:
+### Osnovni zadaci Sensor API-ja
+U tipičnoj aplikaciji, senzorski API se koristi za obavljanje dva osnovna zadatka:
 
 * **Identifikacija senzora i njihovih mogućnosti**
 Identifikacija senzora i njihovih mogućnosti u runtime-u je korisna ako vaša aplikacija ima funkcije koje se oslanjaju na određene tipove senzora ili njihove mogućnosti. Na primer, možda ćete želeti da identifikujete sve senzore prisutne na uređaju i da onemogućite bilo koje funkcije aplikacije koje zavise od senzora koji nisu prisutni. Takođe, možete identifikovati sve senzore određenog tipa kako biste odabrali implementaciju senzora koja ima optimalne performanse za vašu aplikaciju.
