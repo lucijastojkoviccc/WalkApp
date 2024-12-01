@@ -141,10 +141,10 @@ Ovaj interfejs omogućava kreiranje dve metode povratnog poziva koje primaju oba
 ### Osnovni zadaci Sensor API-ja
 U tipičnoj aplikaciji, senzorski API se koristi za obavljanje dva osnovna zadatka:
 
-* **Identifikacija senzora i njihovih mogućnosti**
+* **Identifikacija senzora i njihovih mogućnosti** <br>
 Identifikacija senzora i njihovih mogućnosti u runtime-u je korisna ako vaša aplikacija ima funkcije koje se oslanjaju na određene tipove senzora ili njihove mogućnosti. Na primer, možda ćete želeti da identifikujete sve senzore prisutne na uređaju i da onemogućite bilo koje funkcije aplikacije koje zavise od senzora koji nisu prisutni. Takođe, možete identifikovati sve senzore određenog tipa kako biste odabrali implementaciju senzora koja ima optimalne performanse za vašu aplikaciju.
 
-* **Praćenje događaja senzora**
+* **Praćenje događaja senzora** <br>
 Praćenje događaja senzora omogućava vam dobijanje sirovih podataka senzora. Događaj senzora se javlja svaki put kada senzor detektuje promenu u parametrima koje meri. Događaj senzora pruža četiri ključne informacije: naziv senzora koji je pokrenuo događaj, vremensku oznaku događaja, tačnost događaja i sirove podatke senzora koji su pokrenuli događaj.
 
 ### Dostupnost senzora
