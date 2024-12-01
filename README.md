@@ -72,7 +72,7 @@ RequestPermission(permission = android.Manifest.permission.ACTIVITY_RECOGNITION)
 
 Većina Android uređaja ima ugrađene senzore koji mere pokret, orijentaciju i razne uslove u okruženju. Ovi senzori mogu pružiti sirove podatke sa visokim nivoom preciznosti i tačnosti, što je korisno ako želite da pratite trodimenzionalno kretanje uređaja, njegovu poziciju, ili promene u okruženju u blizini uređaja. Za pristup ovim senzorima, Android koristi klasu SensorManager, koja omogućava otkrivanje senzora na uređaju i pristup njihovim podacima. Na primer:
 
-- Igra može pratiti očitavanja sa senzora gravitacije kako bi prepoznala složene gestove i pokrete korisnika, kao što su nagib, tresenje, rotacija ili zamah.
+- Igra može pratiti očitavanja sa senzora gravitacije kako bi prepoznala složene gestove i pokrete korisnika, kao što su nagib, potres, rotacija ili zamah.
 - Igra može koristiti SensorManager za pristup senzoru gravitacije i pratiti očitavanja kako bi prepoznala složene gestove i pokrete korisnika, kao što su nagib, tresenje, rotacija ili zamah.
 - Aplikacija za vremensku prognozu može koristiti SensorManager za rad sa senzorima temperature i vlažnosti kako bi izračunala i prikazala tačku rose.
 Putna aplikacija može koristiti SensorManager za očitavanja senzora geomagnetnog polja i akcelerometra radi prikazivanja pravca kompasa.
