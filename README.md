@@ -6,6 +6,7 @@
 - Prikaz trenutnog broja koraka i pređene razdaljine u realnom vremenu.
 - Grafikon koji vizualizuje pređene korake po datumu.
 - Čuvanje trenutnog broja koraka u Firebase bazu podataka.
+- Registrovanje pada uređaja.
 
 ## Korišćenje aplikacije
 
@@ -99,7 +100,7 @@ Ovi senzori mere fizičku poziciju uređaja. Ova kategorija uključuje:
 * Senzor orijentacije
 * Magnetometar
 
-Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti hardverski i softverski
+Senzori kojima se može pristupiti pomoću Android senzor framework-a mogu biti hardverski i softverski
 - Hardverski senzori su fizičke komponente ugrađene u uređaj, koje direktno mere specifične osobine okruženja, kao što su ubrzanje, snaga geomagnetnog polja ili ugaona promena.
 - Softverski senzori nisu fizički uređaji, ali oponašaju hardverske senzore. Oni dobijaju podatke kombinovanjem podataka sa jednog ili više hardverskih senzora i ponekad se nazivaju virtuelni senzori. Na primer, senzori linearne akceleracije i gravitacije spadaju u ovu grupu.
 
@@ -142,7 +143,7 @@ Ovaj interfejs omogućava kreiranje dve metode povratnog poziva koje primaju oba
 U tipičnoj aplikaciji, senzorski API se koristi za obavljanje dva osnovna zadatka:
 
 * **Identifikacija senzora i njihovih mogućnosti** <br>
-Identifikacija senzora i njihovih mogućnosti u runtime-u je korisna ako vaša aplikacija ima funkcije koje se oslanjaju na određene tipove senzora ili njihove mogućnosti. Na primer, možda ćete želeti da identifikujete sve senzore prisutne na uređaju i da onemogućite bilo koje funkcije aplikacije koje zavise od senzora koji nisu prisutni. Takođe, možete identifikovati sve senzore određenog tipa kako biste odabrali implementaciju senzora koja ima optimalne performanse za vašu aplikaciju.
+Identifikacija senzora i njihovih mogućnosti u runtime-u je korisna ako aplikacija ima funkcije koje se oslanjaju na određene tipove senzora ili njihove mogućnosti. Na primer, ukoliko je potrebno identifikovati sve senzore prisutne na uređaju i onemogućiti bilo koje funkcije aplikacije koje zavise od senzora koji nisu prisutni. Takođe, moguće je identifikovati sve senzore određenog tipa kako bi se mogao odabrati implementacija senzora koja ima optimalne performanse željenu aplikaciju.
 
 * **Praćenje događaja senzora** <br>
 Praćenje događaja senzora omogućava vam dobijanje sirovih podataka senzora. Događaj senzora se javlja svaki put kada senzor detektuje promenu u parametrima koje meri. Događaj senzora pruža četiri ključne informacije: naziv senzora koji je pokrenuo događaj, vremensku oznaku događaja, tačnost događaja i sirove podatke senzora koji su pokrenuli događaj.
