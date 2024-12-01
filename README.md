@@ -170,7 +170,9 @@ Tabela 2 sumira dostupnost svakog senzora po verzijama platforme. Samo četiri p
 | TYPE_RELATIVE_HUMIDITY     | Da                              | Da                             | n/a                            | n/a                            |
 | TYPE_ROTATION_VECTOR       | Da                              | Da                             | n/a                            | n/a                            |
 | TYPE_TEMPERATURE           | Da²                             | Da²                            | n/a                            | n/a                            |
-
+| TYPE_TYPE_STEP_DETECTOR         | Da                              | Da                             | Da                             | Da                             |
+| TYPE_TYPE_STEP_COUNTER         | Da                              | Da                             | Da                             | Da                             |
+<br>
 ¹ Nije dostupno na svim uređajima sa Android 2.2 i starijim.  
 ² Ovaj senzor je zastareo i zamenjen boljim senzorima u API Level 14.
 
@@ -220,7 +222,7 @@ Kada senzor više nije potreban (npr. kada korisnik zatvori aplikaciju), preporu
 sensorManager.unregisterListener(stepListener)
 ```
 ## Step Counter
-Step Counter je vrsta senzora koji broji ukupne korake od trenutka kada je uređaj uključen ili kada je aplikacija resetovala podatke. On može da koristi akcelerometar uređaja za detekciju ciklusa hodanja (npr. kretanje gore-dole pri svakom koraku).
+Step Counter je vrsta senzora koji broji ukupne korake od trenutka kada je uređaj uključen ili kada je aplikacija resetovala podatke. On može da koristi akcelerometar uređaja za detekciju hodanja.
 
 Kako radi: <br>
 Step Counter vraća ukupan broj koraka kao relativnu vrednost, tj. od trenutka kada je senzor prvi put pokrenut.
