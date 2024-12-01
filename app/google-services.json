@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "142567135801",
+    "project_id": "fitapp-67ee9",
+    "storage_bucket": "fitapp-67ee9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142567135801:android:6d18e70b26c49012e48be8",
+        "android_client_info": {
+          "package_name": "com.example.trackmyfit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "142567135801-miq2ntts0ikgr1t1nrkur7i6715nfc1h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.trackmyfit",
+            "certificate_hash": "c901eb6a647032feb14f60847937c718697d7a10"
+          }
+        },
+        {
+          "client_id": "142567135801-mudnn7nbnhvfne9p8m1i7hferkhfks4h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD2TDhUYr2-u6c3a130Q98-1jdeVTa8ro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "142567135801-mudnn7nbnhvfne9p8m1i7hferkhfks4h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

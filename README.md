@@ -176,7 +176,7 @@ Tabela 2 sumira dostupnost svakog senzora po verzijama platforme. Samo četiri p
 | TYPE_TYPE_STEP_DETECTOR         | Da                              | Da                             | Da                             | Da                             |
 | TYPE_TYPE_STEP_COUNTER         | Da                              | Da                             | Da                             | Da                             |
 <br>
-¹ Nije dostupno na svim uređajima sa Android 2.2 i starijim.  
+¹ Nije dostupno na svim uređajima sa Android 2.2 i starijim.  <br>
 ² Ovaj senzor je zastareo i zamenjen boljim senzorima u API Level 14.
 
 
