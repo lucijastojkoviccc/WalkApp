@@ -120,9 +120,12 @@ Senzori kojima možemo pristupiti pomoću Android senzor framework-a mogu biti h
 | **TYPE_RELATIVE_HUMIDITY**  | Hardware           | Meri relativnu vlažnost vazduha u okruženju u procentima (%).                                                                                  | Praćenje tačke rose, apsolutne i relativne vlažnosti. |
 | **TYPE_ROTATION_VECTOR**    | Software or Hardware | Meri orijentaciju uređaja pružajući tri elementa vektora rotacije uređaja.                                                                     | Detekcija pokreta i rotacije.             |
 | **TYPE_TEMPERATURE**        | Hardware           | Meri temperaturu uređaja u stepenima Celzijusa (°C). Ova implementacija senzora varira između uređaja, a ovaj senzor je zamenjen senzorom `TYPE_AMBIENT_TEMPERATURE` na API nivou 14. | Praćenje temperature.                     |
+| **TYPE_STEP_COUNTER** | Hardware | Broji ukupan broj koraka koje je korisnik napravio od trenutka kada je uređaj uključen ili kada su podaci senzora resetovani. Ova vrednost je kumulativna i ne resetuje se dok se uređaj ne restartuje ili senzor ne resetuje. | Praćenje ukupnog broja koraka korisnika. |
+
+| **TYPE_STEP_DETECTOR** | Hardware | Detektuje pojedinačne korake korisnika u realnom vremenu. Senzor generiše događaj svaki put kada se detektuje korak, što omogućava precizno i trenutnu reakciju na kretanje korisnika. | Detekcija pojedinačnih koraka u realnom vremenu. |
                                       
 ### Sensor Framework 
-Možete pristupiti ovim senzorima i dobiti sirove podatke senzora koristeći Android senzorski okvir. Senzor framework je deo paketa android.hardware i uključuje sledeće klase i interfejse:
+Android Sensor Framework je deo Android SDK koji omogućava aplikacijama pristup različitim senzorima dostupnim na uređaju. Ovi senzori pružaju podatke o fizičkim karakteristikama uređaja i njegovom okruženju, kao što su ubrzanje, rotacija, svetlost, temperatura i mnogi drugi.  Senzor framework je deo paketa android.hardware i uključuje sledeće klase i interfejse:
 
 **SensorManager** <br>
 Ova klasa se koristi za kreiranje instance servisa senzora. Ona pruža različite metode za pristup i listanje senzora, registrovanje i odregistrovanje slušaoca događaja senzora, kao i za dobijanje informacija o orijentaciji. Takođe pruža više konstanti senzora koje se koriste za izveštavanje o tačnosti senzora, podešavanje brzine prikupljanja podataka i kalibraciju senzora.
